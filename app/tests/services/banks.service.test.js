@@ -77,6 +77,12 @@ describe('Banks / Vault Service', () => {
     const secondPage = await getBankTransactions(1, { limit: 1, offset: 1 });
     expect(firstPage).toHaveLength(1);
     expect(secondPage).toHaveLength(0);
+
+    const bankMovements = await getBankTransactions(1, { accountId: bank.id, limit: 1, offset: 0 });
+    const cashVault = accounts.find(a => a.is_cash_vault === 1);
+    const cashMovements = await getBankTransactions(1, { accountId: cashVault.id, limit: 1, offset: 0 });
+    expect(bankMovements.map(tx => tx.id)).toContain(txRes.id);
+    expect(cashMovements.map(tx => tx.id)).not.toContain(txRes.id);
   });
 
   it('should keep the same sales channel mapped independently in each financial year', async () => {

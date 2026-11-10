@@ -78,7 +78,7 @@ export function renderSalesHero(state) {
   const customChannelTotal = Object.values(state.channelSales || {}).reduce((sum, value) => sum + (safeParseFloat(value) || 0), 0);
   const totalOnline = kbank + grab + lineman + krungsri + customChannelTotal;
   const actualCashSales = cashSalesSystem;
-  const totalSales = cashSalesSystem + kbank + grab + lineman + krungsri;
+  const totalSales = cashSalesSystem + totalOnline;
 
   const totalPurchases = (state.purchases || []).reduce((sum, item) => sum + (safeParseFloat(item.amount) || 0), 0);
   const totalEmp = (state.empTxs || []).reduce((sum, item) => sum + (safeParseFloat(item.amount) || safeParseFloat(item.allowances) || 0), 0);
@@ -87,6 +87,46 @@ export function renderSalesHero(state) {
   const cashAvailable = actualCashSales - totalPurchases - totalEmp - totalSup;
   const totalAvailable = cashAvailable + totalOnline;
   const currency = window.appSettings?.currency || '';
+
+  const homeMoney = (id, value) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const next = `${currency}${Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    if (el.textContent !== next) {
+      el.textContent = next;
+      el.classList.remove('home-value-updated');
+      void el.offsetWidth;
+      el.classList.add('home-value-updated');
+    }
+  };
+  homeMoney('home-sales-total', totalSales);
+  homeMoney('home-purchases-total', totalPurchases);
+  homeMoney('home-net-total', totalAvailable);
+  window.__homeDaySnapshot = {
+    reportDate: state.reportDate,
+    sales: totalSales,
+    cashSales: cashSalesSystem,
+    cardSales: kbank,
+    onlineSales: grab + lineman + krungsri + customChannelTotal,
+    purchases: totalPurchases,
+    employees: totalEmp,
+    suppliers: totalSup,
+    net: totalAvailable,
+    cashExpected: cashAvailable,
+    cashActual: safeParseFloat(state.cashierActual),
+    cashEntered: state.cashierActual !== '' && state.cashierActual != null,
+    currency
+  };
+  window.__homeCloseSnapshot = {
+    reportDate: state.reportDate,
+    hasReport: Boolean(state.voucherNumber),
+    cashMatched: state.cashierActual !== '' && state.cashierActual != null && Math.abs(safeParseFloat(state.cashierActual) - cashAvailable) < 0.01,
+    isClosed: Boolean(state.isClosed)
+  };
+  window.renderHomeClosing?.();
+  window.renderHomeActionCenter?.();
+  window.refreshHomeActivity?.();
+  updateHomeSalesChart(state);
 
   const heroTotalSalesEl = document.getElementById('hero-total-sales');
   if (heroTotalSalesEl) {
@@ -125,6 +165,12 @@ export function renderSalesHero(state) {
   if (mixPctCash) mixPctCash.textContent = `${cashPct}%`;
   if (mixPctNet) mixPctNet.textContent = `${netPct}%`;
   if (mixPctOnline) mixPctOnline.textContent = `${onlinePct}%`;
+  const homeCashShare = document.getElementById('home-cash-share');
+  const homeNetworkShare = document.getElementById('home-network-share');
+  const homeOnlineShare = document.getElementById('home-online-share');
+  if (homeCashShare) homeCashShare.textContent = `${cashPct}%`;
+  if (homeNetworkShare) homeNetworkShare.textContent = `${netPct}%`;
+  if (homeOnlineShare) homeOnlineShare.textContent = `${onlinePct}%`;
 
   const displayCashSalesEl = document.getElementById('display-cash-sales');
   if (displayCashSalesEl) {
@@ -136,7 +182,7 @@ export function renderSalesHero(state) {
   }
   const displayOnlineSalesEl = document.getElementById('display-online-sales');
   if (displayOnlineSalesEl) {
-    animateCurrencyDisplay(displayOnlineSalesEl, grab + lineman + krungsri, `<span style="font-size:11px;color:var(--muted)">${currency}</span>`, 0);
+    animateCurrencyDisplay(displayOnlineSalesEl, onlineAppsTotal, `<span style="font-size:11px;color:var(--muted)">${currency}</span>`, 0);
   }
   const footerTotalSalesEl = document.getElementById('footer-total-sales');
   if (footerTotalSalesEl) {
@@ -152,16 +198,18 @@ export function renderSalesHero(state) {
   }
 
   updateHeroDayOverDayTrend(state, totalAvailable);
-  updateHeroDailySalesTarget(grossMixTotal, currency);
+  updateHeroDailySalesTarget(grossMixTotal, currency, state.reportDate);
   updateSmartCashierVarianceBadge(state, actualCashSales, totalPurchases, totalEmp, totalSup, currency);
 }
 
-function updateHeroDailySalesTarget(grossSales, currency) {
+function updateHeroDailySalesTarget(grossSales, currency, reportDate) {
   let targetAmt = 15000;
   try {
     const saved = parseFloat(localStorage.getItem('thabit_daily_sales_target') || '15000');
     if (Number.isFinite(saved) && saved > 0) targetAmt = saved;
   } catch (_) {}
+  window.__homeSalesSnapshot = { grossSales, targetAmt, reportDate };
+  window.renderHomeAlerts?.();
 
   window.__lastHeroGrossSales = grossSales;
   const valEl = document.getElementById('hero-target-val');
@@ -173,6 +221,16 @@ function updateHeroDailySalesTarget(grossSales, currency) {
     valEl.textContent = `${currency}${targetAmt.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
   }
   const pct = targetAmt > 0 ? Math.min(100, Math.round((grossSales / targetAmt) * 100)) : 0;
+  const homeRing = document.getElementById('home-target-ring');
+  const homePercent = document.getElementById('home-target-percent');
+  const homeAmount = document.getElementById('home-target-amount');
+  const homeAchieved = document.getElementById('home-target-achieved');
+  const homeRemaining = document.getElementById('home-target-remaining');
+  if (homeRing) homeRing.style.setProperty('--target-progress', `${pct}%`);
+  if (homePercent) homePercent.textContent = `${targetAmt > 0 ? Math.round(grossSales / targetAmt * 100) : 0}%`;
+  if (homeAmount) homeAmount.textContent = `${currency}${targetAmt.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+  if (homeAchieved) homeAchieved.textContent = `${currency}${grossSales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (homeRemaining) homeRemaining.textContent = `${currency}${Math.max(0, targetAmt - grossSales).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   if (fillEl) {
     fillEl.style.width = `${pct}%`;
     fillEl.classList.toggle('achieved', grossSales >= targetAmt);
@@ -227,6 +285,57 @@ function updateSmartCashierVarianceBadge(state, cashSales, totalPurchases, total
 }
 
 let dodFetchSeq = 0;
+let homeChartSeq = 0;
+const homeChartCache = new Map();
+
+async function updateHomeSalesChart(state) {
+  const chart = document.getElementById('home-sales-sparkline');
+  const dateStr = state?.reportDate || document.getElementById('input-report-date')?.value;
+  if (!chart || !dateStr || !window.api?.getReportState) return;
+  const seq = ++homeChartSeq;
+  const cashier = state?.cashierName || document.getElementById('select-report-cashier')?.value || null;
+  const yearId = state?.year_id || window.currentYearId || 1;
+  const days = Array.from({ length: 8 }, (_, i) => {
+    const d = new Date(`${dateStr}T12:00:00`);
+    d.setDate(d.getDate() - (7 - i));
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  });
+  try {
+    const values = await Promise.all(days.map(async day => {
+      const cacheKey = `${yearId}|${cashier}|${day}`;
+      const cached = homeChartCache.get(cacheKey);
+      if (day !== dateStr && cached && Date.now() - cached.at < 30000) return cached.value;
+      const report = day === dateStr ? state : await window.api.getReportState(day, cashier, yearId);
+      const sales = report?.sales || {};
+      const value = ['cash', 'kbank', 'grab', 'lineman', 'krungsri'].reduce((sum, key) => sum + safeParseFloat(sales[key]), 0)
+        + Object.values(report?.channelSales || {}).reduce((sum, amount) => sum + safeParseFloat(amount), 0);
+      if (day !== dateStr) homeChartCache.set(cacheKey, { value, at: Date.now() });
+      return value;
+    }));
+    if (seq !== homeChartSeq) return;
+    window.renderHomeComparison?.(values);
+    const sparkValues = values.slice(1);
+    const max = Math.max(1, ...sparkValues);
+    const points = sparkValues.map((value, i) => `${i * 40},${33 - (value / max) * 27}`).join(' ');
+    const svgNs = 'http://www.w3.org/2000/svg';
+    const area = document.createElementNS(svgNs, 'polygon');
+    area.setAttribute('points', `0,36 ${points} 240,36`);
+    area.setAttribute('class', 'home-sparkline-area');
+    const line = document.createElementNS(svgNs, 'polyline');
+    line.setAttribute('points', points);
+    line.setAttribute('class', 'home-sparkline-line');
+    const last = document.createElementNS(svgNs, 'circle');
+    last.setAttribute('cx', '240');
+    last.setAttribute('cy', String(33 - (values[7] / max) * 27));
+    last.setAttribute('r', '3');
+    last.setAttribute('class', 'home-sparkline-dot');
+    chart.replaceChildren();
+    chart.append(area, line, last);
+  } catch (error) {
+    if (seq === homeChartSeq) chart.replaceChildren();
+    console.error('Failed to load home sales chart:', error);
+  }
+}
 
 function computeNetAvailableFromReportState(repState) {
   if (!repState || !repState.sales) return 0;
@@ -245,7 +354,8 @@ function computeNetAvailableFromReportState(repState) {
 
 async function updateHeroDayOverDayTrend(state, todayAvailable) {
   const badgeEl = document.getElementById('hero-dod-badge');
-  if (!badgeEl || !window.api?.getReportState) return;
+  const homeTrend = document.getElementById('home-net-trend');
+  if ((!badgeEl && !homeTrend) || !window.api?.getReportState) return;
   const dateStr = state?.reportDate || document.getElementById('input-report-date')?.value || '';
   if (!dateStr) return;
 
@@ -267,10 +377,11 @@ async function updateHeroDayOverDayTrend(state, todayAvailable) {
     const prevNet = computeNetAvailableFromReportState(prevState);
     const tr = typeof t === 'function' ? t : (k) => k;
 
-    badgeEl.classList.remove('dod-up', 'dod-down', 'dod-flat');
+    badgeEl?.classList.remove('dod-up', 'dod-down', 'dod-flat');
+    homeTrend?.classList.remove('dod-up', 'dod-down', 'dod-flat');
     if (Math.abs(prevNet) < 0.01) {
-      badgeEl.classList.add('dod-flat');
-      badgeEl.textContent = `• ${tr('dod_no_yesterday_data')}`;
+      if (badgeEl) { badgeEl.classList.add('dod-flat'); badgeEl.textContent = `• ${tr('dod_no_yesterday_data')}`; }
+      if (homeTrend) { homeTrend.classList.add('dod-flat'); homeTrend.textContent = `• ${tr('dod_no_yesterday_data')}`; }
       return;
     }
 
@@ -278,14 +389,14 @@ async function updateHeroDayOverDayTrend(state, todayAvailable) {
     const rounded = Math.round(diffPct * 10) / 10;
 
     if (rounded > 0.2) {
-      badgeEl.classList.add('dod-up');
-      badgeEl.textContent = `▲ +${rounded}% ${tr('dod_vs_yesterday_up')}`;
+      if (badgeEl) { badgeEl.classList.add('dod-up'); badgeEl.textContent = `▲ +${rounded}% ${tr('dod_vs_yesterday_up')}`; }
+      if (homeTrend) { homeTrend.classList.add('dod-up'); homeTrend.textContent = `▲ +${rounded}% ${tr('dod_vs_yesterday_up')}`; }
     } else if (rounded < -0.2) {
-      badgeEl.classList.add('dod-down');
-      badgeEl.textContent = `▼ ${rounded}% ${tr('dod_vs_yesterday_down')}`;
+      if (badgeEl) { badgeEl.classList.add('dod-down'); badgeEl.textContent = `▼ ${rounded}% ${tr('dod_vs_yesterday_down')}`; }
+      if (homeTrend) { homeTrend.classList.add('dod-down'); homeTrend.textContent = `▼ ${rounded}% ${tr('dod_vs_yesterday_down')}`; }
     } else {
-      badgeEl.classList.add('dod-flat');
-      badgeEl.textContent = `• ${tr('dod_vs_yesterday_flat')}`;
+      if (badgeEl) { badgeEl.classList.add('dod-flat'); badgeEl.textContent = `• ${tr('dod_vs_yesterday_flat')}`; }
+      if (homeTrend) { homeTrend.classList.add('dod-flat'); homeTrend.textContent = `• ${tr('dod_vs_yesterday_flat')}`; }
     }
   } catch (_) {}
 }

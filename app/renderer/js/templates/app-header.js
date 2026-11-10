@@ -41,17 +41,17 @@
             <span data-i18n="cmd_palette_btn">🔍 بحث سريع (Ctrl+K)</span>
           </button>
 
-          <button id="btn-privacy-blur" type="button" class="settings-btn luxury-icon-pill" onclick="toggleVipPrivacyBlur()" data-i18n-title="privacy_blur_btn_title" title="إخفاء / إظهار الأرقام المالية (F9)"
+          <button id="btn-privacy-blur" type="button" class="settings-btn luxury-icon-pill" onclick="toggleVipPrivacyBlur()" data-i18n-title="privacy_blur_btn_title" title="إخفاء / إظهار الأرقام المالية (Ctrl+9)"
             style="background-color: var(--card); border: 1px solid var(--border); color: var(--text); padding: 5px 10px; border-radius: 999px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px;">
             <span id="privacy-blur-icon">👁️</span>
           </button>
 
-          <button id="btn-floating-calc" type="button" class="settings-btn luxury-icon-pill" onclick="toggleExecutiveCalculator()" data-i18n-title="calc_btn_title" title="الآلة الحاسبة المحاسبية السريعة (F10)"
+          <button id="btn-floating-calc" type="button" class="settings-btn luxury-icon-pill" onclick="toggleExecutiveCalculator()" data-i18n-title="calc_btn_title" title="الآلة الحاسبة المحاسبية السريعة (Ctrl+0)"
             style="background-color: var(--card); border: 1px solid var(--border); color: var(--text); padding: 5px 10px; border-radius: 999px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px;">
             🧮
           </button>
 
-          <button id="btn-sticky-notes" type="button" class="settings-btn luxury-icon-pill" onclick="toggleRoyalStickyNotes()" data-i18n-title="sticky_notes_btn_title" title="المفكرة الملكية العائمة والتذكيرات (F11)"
+          <button id="btn-sticky-notes" type="button" class="settings-btn luxury-icon-pill" onclick="toggleRoyalStickyNotes()" data-i18n-title="sticky_notes_btn_title" title="المفكرة الملكية العائمة والتذكيرات (Ctrl+Shift+1)"
             style="background-color: var(--card); border: 1px solid var(--border); color: var(--text); padding: 5px 10px; border-radius: 999px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px;">
             📌
           </button>
@@ -66,7 +66,7 @@
             🔒
           </button>
 
-          <button id="btn-shortcuts-guide" type="button" class="settings-btn luxury-icon-pill" onclick="toggleRoyalShortcutsModal()" data-i18n-title="shortcuts_btn_title" title="دليل الاختصارات الملكية السريعة (F12)"
+          <button id="btn-shortcuts-guide" type="button" class="settings-btn luxury-icon-pill" onclick="toggleRoyalShortcutsModal()" data-i18n-title="shortcuts_btn_title" title="دليل الاختصارات الملكية السريعة (Ctrl+Shift+2)"
             style="background-color: var(--card); border: 1px solid var(--border); color: var(--text); padding: 5px 10px; border-radius: 999px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px;">
             ⌨️
           </button>

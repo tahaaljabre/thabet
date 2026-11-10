@@ -6,6 +6,7 @@ jest.mock('../../main/services/database', () => ({
 
 const database = require('../../main/services/database');
 const {
+  getHomeActivity,
   deletePartner,
   getSettingsPartners,
   getCashiers
@@ -14,6 +15,19 @@ const {
 describe('Dashboard Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('combines recent sales, cash, and bank activity for the active year', async () => {
+    database.dbAll
+      .mockResolvedValueOnce([{ date: '2026-11-09', id: 4, detail: 'Cashier', amount: 120 }])
+      .mockResolvedValueOnce([{ date: '2026-11-08', id: 8, detail: 'Cash', amount: 30 }])
+      .mockResolvedValueOnce([{ date: '2026-11-10', id: 3, detail: 'Transfer', amount: 50, accountId: 2 }]);
+
+    const rows = await getHomeActivity(7);
+
+    expect(rows.map(row => row.type)).toEqual(['banks', 'sales', 'vault']);
+    expect(database.dbAll).toHaveBeenCalledTimes(3);
+    expect(database.dbAll.mock.calls.every(([, params]) => params[0] === 7)).toBe(true);
   });
 
   it('should not delete a partner when a reference check fails', async () => {

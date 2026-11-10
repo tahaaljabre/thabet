@@ -21,6 +21,7 @@ const { startMobileSyncServer } = require('./main/services/mobile-sync-server.se
 const { dbGet, dbAll, dbRun, closeDatabase } = require('./main/services/database');
 const { withTransaction } = require('./main/services/database/transaction');
 const { getLocalDateString } = require('./main/utils/date');
+const { attachShortcutRouter } = require('./main/utils/shortcut-router');
 
 let mainWindow;
 
@@ -52,6 +53,7 @@ function createWindow() {
 
 app.whenReady().then(() => {
   Menu.setApplicationMenu(null);
+  attachShortcutRouter(app, () => mainWindow);
   createWindow();
 
   try { startMobileSyncServer(); } catch(e){ console.error(e); }

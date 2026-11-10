@@ -54,6 +54,8 @@ async function checkInitialLogin() {
         if (compEl) compEl.textContent = appSettings.companyName || t('default_company_name');
         if (branchEl) branchEl.textContent = appSettings.branchName || '';
         if (logoEl && appSettings.logo) logoEl.src = appSettings.logo;
+        const sidebarLogo = document.getElementById('home-sidebar-logo');
+        if (sidebarLogo && appSettings.logo) sidebarLogo.src = appSettings.logo;
       }
 
       const userInfoEl = document.getElementById('current-user-info');
@@ -186,6 +188,8 @@ async function performLogin() {
       
       if (appSettings.logo) {
         document.getElementById('header-logo-img').src = appSettings.logo;
+        const sidebarLogo = document.getElementById('home-sidebar-logo');
+        if (sidebarLogo) sidebarLogo.src = appSettings.logo;
       }
       
       document.getElementById('login-modal').style.display = 'none';

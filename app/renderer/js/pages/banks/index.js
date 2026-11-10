@@ -37,16 +37,18 @@ function renderBankSalesMappings() {
 async function loadBanksData() {
   try {
     const activeYearId = window.currentYearId || 1;
+    const accountId = Number(document.getElementById('bank-tx-filter-account')?.value) || null;
     [bankAccounts, bankMappings, bankTransactions] = await Promise.all([
       window.api.getBankAccounts(activeYearId),
       window.api.getBankSalesMappings(activeYearId),
-      window.api.getBankTransactions(activeYearId, { limit: BANK_TRANSACTIONS_PAGE_SIZE, offset: 0 })
+      window.api.getBankTransactions(activeYearId, { limit: BANK_TRANSACTIONS_PAGE_SIZE, offset: 0, accountId })
     ]);
     bankTransactionsHasMore = bankTransactions.length === BANK_TRANSACTIONS_PAGE_SIZE;
 
     renderBankAccountsGrid();
     renderBankSalesMappings();
     populateBankDropdowns();
+    populateBankTransactionAccountFilter();
     renderBankTransactionsTable();
     updateBankLoadMoreButton();
     if (typeof window.loadBankReconciliations === 'function') await window.loadBankReconciliations();
@@ -73,7 +75,8 @@ async function loadMoreBankTransactions() {
   try {
     const rows = await window.api.getBankTransactions(window.currentYearId || 1, {
       limit: BANK_TRANSACTIONS_PAGE_SIZE,
-      offset: bankTransactions.length
+      offset: bankTransactions.length,
+      accountId: Number(document.getElementById('bank-tx-filter-account')?.value) || null
     });
     bankTransactions.push(...rows);
     bankTransactionsHasMore = rows.length === BANK_TRANSACTIONS_PAGE_SIZE;
@@ -85,6 +88,35 @@ async function loadMoreBankTransactions() {
   }
 }
 window.loadMoreBankTransactions = loadMoreBankTransactions;
+
+function populateBankTransactionAccountFilter() {
+  const select = document.getElementById('bank-tx-filter-account');
+  if (!select) return;
+  const previous = select.value;
+  select.replaceChildren();
+  const all = document.createElement('option');
+  all.value = '';
+  all.textContent = t('home_all_bank_accounts');
+  select.appendChild(all);
+  bankAccounts.forEach(account => {
+    const option = document.createElement('option');
+    option.value = String(account.id);
+    option.textContent = account.bank_name;
+    select.appendChild(option);
+  });
+  if (previous && bankAccounts.some(account => String(account.id) === previous)) select.value = previous;
+}
+
+async function applyBankAccountFilter() {
+  const accountId = Number(document.getElementById('bank-tx-filter-account')?.value) || null;
+  bankTransactions = await window.api.getBankTransactions(window.currentYearId || 1, {
+    limit: BANK_TRANSACTIONS_PAGE_SIZE, offset: 0, accountId
+  });
+  bankTransactionsHasMore = bankTransactions.length === BANK_TRANSACTIONS_PAGE_SIZE;
+  renderBankTransactionsTable();
+  updateBankLoadMoreButton();
+}
+window.applyBankAccountFilter = applyBankAccountFilter;
 
 function renderBankAccountsGrid() {
   const grid = document.getElementById('banks-grid');

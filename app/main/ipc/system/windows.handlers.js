@@ -151,6 +151,7 @@ function registerWindowHandlers(mainWindow) {
       entityId = '',
       entityName = '',
       voucherNumber = '',
+      accountId = '',
       title = 'مطعم حضرموت اليمن - النظام الإداري',
       yearId,
       yearName
@@ -180,6 +181,7 @@ function registerWindowHandlers(mainWindow) {
         entityId: entityId ? String(entityId) : '',
         entityName: entityName ? String(entityName) : '',
         voucherNumber: voucherNumber ? String(voucherNumber) : '',
+        accountId: accountId ? String(accountId) : '',
         yearId: yearId || '',
         yearName: yearName !== undefined ? String(yearName) : '',
         isFreshOpen: !wasVisible
@@ -277,6 +279,7 @@ function registerWindowHandlers(mainWindow) {
         entityId: entityId ? String(entityId) : '',
         entityName: entityName ? String(entityName) : '',
         voucherNumber: voucherNumber ? String(voucherNumber) : '',
+        accountId: accountId ? String(accountId) : '',
         yearId: yearId ? String(yearId) : '',
         yearName: yearName !== undefined ? String(yearName) : ''
       }

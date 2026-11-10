@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="renderer/css/main.css">
   <link rel="stylesheet" href="renderer/css/components.css">
   <link rel="stylesheet" href="renderer/css/pages.css">
+  <link rel="stylesheet" href="renderer/css/home.css">
   <link rel="stylesheet" href="renderer/css/pages/settings.css">
   <link rel="stylesheet" href="renderer/css/print.css" media="print">
 </head>
@@ -28,6 +29,38 @@
 
   <!-- ══ MAIN ══ -->
   <div class="main">
+    <div class="home-dashboard" id="home-dashboard">
+      <div class="home-welcome">
+        <div><strong data-i18n="home_dashboard_title">لوحة التحكم الرئيسية</strong><span data-i18n="home_dashboard_hint">نظرة شاملة على أداء المطعم لليوم المحدد</span></div>
+        <button type="button" class="home-alert-settings" onclick="openHomeAlertSettings()" data-i18n-title="home_alert_settings" title="ضبط حد تنبيه الصندوق">⚙️</button>
+        <button type="button" class="home-customize-button" onclick="openHomeCustomization()" data-i18n="home_customize_button">تخصيص الشاشة</button>
+        <div class="home-alerts" id="home-alerts" aria-live="polite" hidden></div>
+      </div>
+      <section class="home-action-center" aria-labelledby="home-action-title">
+        <div class="home-action-heading"><div><strong id="home-action-title" data-i18n="home_action_title">متابعة اليوم</strong><span data-i18n="home_action_hint">الخطوات التي تحتاج انتباهك الآن</span></div><button type="button" id="home-day-summary-button" onclick="openHomeDaySummary()" data-i18n="home_day_summary_button">ملخص نهاية اليوم</button></div>
+        <div id="home-action-items" class="home-action-items" aria-live="polite" data-i18n="loading">جاري التحميل...</div>
+      </section>
+      <div class="home-top-panel" data-home-panel="overview">
+      <div class="home-kpis">
+        <div class="home-kpi" data-icon="◉"><span data-i18n="home_daily_sales">إجمالي المبيعات اليومية</span><strong id="home-sales-total" dir="ltr">0</strong><button type="button" class="home-kpi-detail" data-home-detail="sales" data-i18n="home_view_breakdown">عرض التفاصيل</button><div class="home-sales-compare"><select id="home-compare-range" data-i18n-aria-label="home_compare_label" aria-label="مقارنة المبيعات"><option value="yesterday" data-i18n="home_compare_yesterday">مقارنة بأمس</option><option value="average" data-i18n="home_compare_average">متوسط آخر 7 أيام</option></select><small id="home-sales-comparison" data-i18n="home_compare_no_data">لا توجد بيانات مقارنة</small></div><svg class="home-sparkline" id="home-sales-sparkline" viewBox="0 0 240 36" preserveAspectRatio="none" role="img" data-i18n-aria-label="home_last_seven_days" aria-label="آخر 7 أيام حتى اليوم المحدد"></svg></div>
+        <div class="home-kpi"><span data-i18n="home_total_purchases">إجمالي المشتريات</span><strong id="home-purchases-total" dir="ltr">0</strong><small data-i18n="home_selected_day">لليوم المحدد</small></div>
+        <div class="home-kpi" data-icon="▣"><span data-i18n="home_daily_net">صافي المتوفر اليومي</span><strong id="home-net-total" dir="ltr">0</strong><button type="button" class="home-kpi-detail" data-home-detail="net" data-i18n="home_view_breakdown">عرض التفاصيل</button><small id="home-net-trend" data-i18n="net_full_day_available">صافي اليوم الكامل المتاح — نقد + إلكتروني</small></div>
+        <div class="home-kpi"><span data-i18n="liquidity_cash_vault">صندوق الكاش</span><strong id="home-cash-balance" dir="ltr">0</strong><small data-i18n="liquidity_ticker_title">السيولة والأرصدة الحية الآن</small></div>
+      </div>
+      <div class="home-analysis">
+        <div class="home-chart-panel">
+          <div class="home-panel-heading"><strong data-i18n="home_sales_trend">أداء المبيعات</strong><span data-i18n="home_last_seven_days">آخر 7 أيام حتى اليوم المحدد</span></div>
+          <div class="home-chart" id="home-sales-chart" role="img" data-i18n-aria-label="home_sales_trend" aria-label="أداء المبيعات"></div>
+        </div>
+        <div class="home-target-panel">
+          <div class="home-panel-heading"><strong data-i18n="home_target_progress">إنجاز الهدف اليومي</strong><button type="button" class="home-target-edit" onclick="openDailySalesTargetPrompt()" data-i18n="daily_target_edit_btn">تعديل الهدف</button></div>
+          <div class="home-target-ring" id="home-target-ring"><strong id="home-target-percent">0%</strong></div>
+          <div class="home-target-details"><span data-i18n="daily_target_label">الهدف اليومي للمبيعات:</span><strong id="home-target-amount" dir="ltr">0</strong></div>
+          <div class="home-target-details"><span data-i18n="home_target_achieved">المحقق</span><strong id="home-target-achieved" dir="ltr">0</strong></div>
+          <div class="home-target-details"><span data-i18n="daily_target_remaining">المتبقي</span><strong id="home-target-remaining" dir="ltr">0</strong></div>
+        </div>
+      </div>
+      </div>
 
     <!-- Hero Total -->
     <div class="hero-card primary" style="animation-delay:.05s">
@@ -69,43 +102,70 @@
     </div>
 
     <!-- Mini Cards -->
-    <div class="mini-grid">
-      <div class="mini-card" style="animation-delay:.10s">
+    <div class="mini-grid" data-home-panel="channels">
+      <div class="mini-card" data-icon="▱" style="animation-delay:.10s">
         <div class="dot-ind" style="background:var(--lahmi2);box-shadow:0 0 6px var(--lahmi2)"></div>
         <div class="card-label"><span data-i18n="cash_sales">مبيعات نقد</span></div>
         <div class="card-amount lahmi" id="display-cash-sales"><span style="font-size:11px;color:var(--muted)"><span
               class="sys-currency"></span></span>0</div>
         <div class="card-sub"><span data-i18n="net_actual_cash">صافي النقد الفعلي</span></div>
+        <div class="home-channel-share" id="home-cash-share" dir="ltr">0%</div>
       </div>
-      <div class="mini-card" style="animation-delay:.12s">
+      <div class="mini-card" data-icon="▤" style="animation-delay:.12s">
         <div class="dot-ind" style="background:var(--beige3);box-shadow:0 0 6px var(--beige3)"></div>
         <div class="card-label"><span data-i18n="network_sales">مبيعات شبكة</span></div>
         <div class="card-amount" style="color:var(--beige3)" id="display-network-sales"><span
             style="font-size:11px;color:var(--muted)"><span class="sys-currency"></span></span>0</div>
         <div class="card-sub"><span data-i18n="cards_kbank">البطاقات (KBank)</span></div>
+        <div class="home-channel-share" id="home-network-share" dir="ltr">0%</div>
       </div>
-      <div class="mini-card" style="animation-delay:.15s">
+      <div class="mini-card" data-icon="▣" style="animation-delay:.15s">
         <div class="dot-ind" style="background:var(--green2);box-shadow:0 0 6px var(--green2)"></div>
         <div class="card-label"><span data-i18n="online_sales">مبيعات أونلاين</span></div>
         <div class="card-amount green" id="display-online-sales"><span style="font-size:11px;color:var(--muted)"><span
               class="sys-currency"></span></span>0</div>
         <div class="card-sub"><span data-i18n="delivery_apps">تطبيقات التوصيل والتحويل</span></div>
+        <div class="home-channel-share" id="home-online-share" dir="ltr">0%</div>
       </div>
     </div>
 
     <!-- Live Liquidity & Vault Ticker -->
-    <div class="luxury-liquidity-ticker" id="luxury-liquidity-ticker">
-      <div class="liquidity-ticker-head">
-        <span class="liquidity-ticker-label" data-i18n="liquidity_ticker_title">💎 السيولة والأرصدة الحية الآن</span>
-        <button type="button" class="liquidity-refresh-btn" onclick="refreshLiquidityTicker()" data-i18n-title="liquidity_refresh_title" title="تحديث الأرصدة الحية">↻</button>
+    <div class="luxury-liquidity-ticker" id="luxury-liquidity-ticker" data-home-panel="balances">
+      <div class="home-liquidity-panel">
+        <div class="home-balance-heading"><strong data-i18n="home_available_liquidity">السيولة والأرصدة المتاحة</strong><button type="button" class="home-kpi-detail" data-home-detail="liquidity" data-i18n="home_view_breakdown">عرض التفاصيل</button><span class="home-updated" id="home-last-updated"></span><button type="button" class="liquidity-refresh-btn" onclick="refreshLiquidityTicker()" data-i18n-title="liquidity_refresh_title" title="تحديث الأرصدة الحية">↻</button></div>
+        <div class="home-liquidity-rows">
+          <div class="home-balance-row"><span data-i18n="liquidity_cash_vault">صندوق الكاش</span><strong id="home-liquidity-cash" dir="ltr">0</strong></div>
+          <div class="home-balance-row"><span data-i18n="liquidity_total_banks">إجمالي البنوك</span><strong id="home-liquidity-banks" dir="ltr">0</strong></div>
+          <div class="home-balance-row home-balance-total"><span data-i18n="liquidity_net_total">إجمالي السيولة</span><strong id="home-liquidity-total" dir="ltr">0</strong></div>
+        </div>
       </div>
-      <div class="liquidity-ticker-chips" id="liquidity-ticker-chips"></div>
+      <div class="home-banks-panel">
+        <div class="home-balance-heading"><strong data-i18n="home_bank_accounts">أرصدة حسابات البنوك</strong></div>
+        <div class="home-bank-list" id="home-bank-list" aria-live="polite" data-i18n="loading">جاري التحميل...</div>
+      </div>
     </div>
 
+    <div class="home-detail-grid">
+      <section class="home-detail-card" data-home-panel="activity">
+        <div class="home-detail-heading"><strong data-i18n="home_recent_activity">آخر الحركات</strong><button type="button" onclick="refreshHomeActivity(true)" data-i18n="dashboard_refresh">تحديث</button></div>
+        <div id="home-activity-list" class="home-activity-list" aria-live="polite" data-i18n="loading">جاري التحميل...</div>
+      </section>
+      <section class="home-detail-card" data-home-panel="closing">
+        <div class="home-detail-heading"><strong data-i18n="home_daily_close_status">حالة التقرير اليومي</strong></div>
+        <div id="home-closing-status" class="home-closing-status"></div>
+      </section>
+    </div>
+
+    <aside class="home-sidebar" data-i18n-aria-label="home_navigation_title" aria-label="القائمة الرئيسية">
+      <div class="home-sidebar-brand">
+        <img src="LOGO_PLACEHOLDER" alt="شعار المطعم" data-i18n-alt="company_logo_alt" id="home-sidebar-logo">
+        <strong data-i18n="home_welcome_title">مركز العمليات</strong>
+        <span data-i18n="home_welcome_hint">نظرة سريعة على أداء اليوم المحدد</span>
+      </div>
     <!-- Section -->
     <div class="section-title luxury-dock-header">
       <div class="luxury-dock-title-group">
-        <span data-i18n="sales_channels_chart">📊 قنوات المبيعات</span>
+        <span data-i18n="home_navigation_title">القائمة الرئيسية</span>
       </div>
       <div class="luxury-dock-actions" id="open-windows-toolbar" style="display:none;">
         <button type="button" class="luxury-dock-action-btn cascade-btn" id="btn-cascade-windows" onclick="cascadeOpenSectionWindows()">
@@ -119,17 +179,19 @@
 
     <!-- Tabs -->
     <div class="tabs luxury-dock-grid" id="main-tabs-nav">
-      <button class="tab-btn" onclick="switchTab('sales')" data-icon="💰" data-shortcut="F1" data-i18n="menu_customers">المبيعات</button>
-      <button class="tab-btn" onclick="switchTab('purchases')" data-icon="🛒" data-shortcut="F2" data-i18n="menu_purchases">مشتريات</button>
-      <button class="tab-btn" onclick="switchTab('suppliers')" data-icon="🚚" data-shortcut="F3" data-i18n="menu_suppliers">الموردين</button>
-      <button class="tab-btn" onclick="switchTab('employees')" data-icon="👥" data-shortcut="F4" data-i18n="menu_employees">الموظفين</button>
-      <button class="tab-btn" onclick="switchTab('vault')" data-icon="🏦" data-shortcut="F5" data-i18n="menu_vault">الصندوق</button>
-      <button class="tab-btn" onclick="switchTab('banks')" id="tab-btn-banks" data-icon="🏛️" data-shortcut="F6" style="color: var(--primary-color);"
+      <button class="tab-btn" onclick="switchTab('sales')" data-icon="💰" data-shortcut="Ctrl+1" data-i18n="menu_customers">المبيعات</button>
+      <button class="tab-btn" onclick="switchTab('purchases')" data-icon="🛒" data-shortcut="Ctrl+2" data-i18n="menu_purchases">مشتريات</button>
+      <button class="tab-btn" onclick="switchTab('suppliers')" data-icon="🚚" data-shortcut="Ctrl+3" data-i18n="menu_suppliers">الموردين</button>
+      <button class="tab-btn" onclick="switchTab('employees')" data-icon="👥" data-shortcut="Ctrl+4" data-i18n="menu_employees">الموظفين</button>
+      <button class="tab-btn" onclick="switchTab('vault')" data-icon="🏦" data-shortcut="Ctrl+5" data-i18n="menu_vault">الصندوق</button>
+      <button class="tab-btn" onclick="switchTab('banks')" id="tab-btn-banks" data-icon="🏛️" data-shortcut="Ctrl+6" style="color: var(--primary-color);"
         data-i18n="tab_btn_banks">🏛️ البنوك والحسابات</button>
-      <button id="tab-btn-dashboard" class="tab-btn" onclick="switchTab('dashboard')" data-icon="📊" data-shortcut="F7"
+      <button id="tab-btn-dashboard" class="tab-btn" onclick="switchTab('dashboard')" data-icon="📊" data-shortcut="Ctrl+7"
         style="display:none; color: var(--primary);" data-i18n="menu_dashboard">📊 الشاشة التفاعلية</button>
-      <button class="tab-btn" onclick="switchTab('closing')" id="tab-btn-closing" data-icon="🔒" data-shortcut="F8" style="color: var(--red);"
+      <button class="tab-btn" onclick="switchTab('closing')" id="tab-btn-closing" data-icon="🔒" data-shortcut="Ctrl+8" style="color: var(--red);"
         data-i18n="tab_btn_closing">🔒 إغلاق السنة المالية</button>
+    </div>
+    </aside>
     </div>
 
     <div id="banks-page-root"></div>
@@ -626,8 +688,7 @@
   <script src="renderer/js/pages/banks/statements/excel.js"></script>
   <script src="renderer/js/pages/banks/statements/index.js"></script>
   <script src="renderer/js/bootstrap/dropdowns.js"></script>
-  <div id="global-modals-root"></div>
-  <script type="module" src="renderer/js/bootstrap/global-modals.js"></script>
+  <script src="renderer/js/bootstrap/global-modals.js"></script>
 
 
   <!-- Core Scripts & Config -->
@@ -638,6 +699,7 @@
   <script src="renderer/js/core/event-bus.js"></script>
   <script src="renderer/js/core/ui-helpers.js"></script>
   <script src="renderer/js/core/init.js"></script>
+  <script src="renderer/js/core/home-dashboard.js"></script>
   <script src="renderer/js/core/print-engine/full-report.js"></script>
   <script src="renderer/js/core/print-engine/voucher-data.js"></script>
   <script src="renderer/js/core/print-engine/voucher-templates.js"></script>

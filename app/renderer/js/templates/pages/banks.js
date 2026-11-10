@@ -141,6 +141,10 @@
           <span data-i18n="recent_bank_operations">📋 كشف العمليات والسندات البنكية الأخيرة</span>
           <div class="bank-history-actions">
             <div class="bank-history-date-filter">
+              <label class="form-label" data-i18n="home_bank_filter_label">الحساب</label>
+              <select id="bank-tx-filter-account" class="form-control" onchange="applyBankAccountFilter()"></select>
+            </div>
+            <div class="bank-history-date-filter">
               <label class="form-label" data-i18n="date_from">من تاريخ</label>
               <input type="date" id="bank-tx-filter-from" class="form-control" onchange="applyBankTransactionDateFilter()">
             </div>

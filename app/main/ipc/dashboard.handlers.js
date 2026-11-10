@@ -4,6 +4,9 @@ const accountingService = require('../services/accounting.service');
 const { requireAuth } = require('./auth.helper');
 
 function registerDashboardHandlers() {
+  ipcMain.handle('get-home-activity', requireAuth({ role: 'manager' }, async (_event, yearId) => {
+    return dashboardService.getHomeActivity(yearId);
+  }));
   ipcMain.handle('get-dashboard-stats', requireAuth({ role: 'manager' }, async (event, startDate, endDate, yearId, cashierName) => {
     return await dashboardService.getDashboardStats(startDate, endDate, yearId, cashierName);
   }));

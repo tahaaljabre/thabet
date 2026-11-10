@@ -2,6 +2,25 @@ const { dbGet, dbAll, dbRun } = require('./database');
 
 const { getFinancialSummary } = require('./finance.service');
 
+async function getHomeActivity(yearId) {
+  const [sales, vault, banks] = await Promise.all([
+    dbAll(`SELECT report_date AS date, voucher_number AS id, cashier_name AS detail,
+      COALESCE(cash_sales, 0) + COALESCE(kbank, 0) + COALESCE(grab, 0) + COALESCE(lineman, 0) + COALESCE(krungsri, 0) +
+      COALESCE((SELECT SUM(amount) FROM DailyReportChannelSales c WHERE c.report_date = d.report_date AND c.cashier_name = d.cashier_name AND c.year_id = d.year_id), 0) AS amount
+      FROM daily_reports d WHERE year_id = ? AND COALESCE(is_voided, 0) = 0 ORDER BY report_date DESC LIMIT 6`, [yearId]),
+    dbAll(`SELECT voucher_date AS date, id, category AS detail, amount FROM CashGeneralVouchers
+      WHERE year_id = ? AND COALESCE(is_voided, 0) = 0 ORDER BY voucher_date DESC, id DESC LIMIT 6`, [yearId]),
+    dbAll(`SELECT tx_date AS date, id, description AS detail, amount,
+      COALESCE(from_account_id, to_account_id) AS accountId FROM BankTransactions
+      WHERE year_id = ? AND COALESCE(is_voided, 0) = 0 ORDER BY tx_date DESC, id DESC LIMIT 6`, [yearId])
+  ]);
+  return [
+    ...sales.map(row => ({ ...row, type: 'sales' })),
+    ...vault.map(row => ({ ...row, type: 'vault' })),
+    ...banks.map(row => ({ ...row, type: 'banks' }))
+  ].sort((a, b) => b.date.localeCompare(a.date) || Number(b.id || 0) - Number(a.id || 0)).slice(0, 6);
+}
+
 async function getDashboardStats(startDate, endDate, yearId, cashierName) {
   try {
     const stats = await getFinancialSummary(startDate, endDate, yearId, cashierName);
@@ -155,6 +174,7 @@ async function deleteCashier(id) {
 }
 
 module.exports = {
+  getHomeActivity,
   getDashboardStats,
   getSettingsPartners,
   updatePartner,

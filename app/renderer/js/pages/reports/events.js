@@ -52,9 +52,9 @@ const t = (key) => {
     'partner_shares_dist': 'حصص وتوزيعات الأرباح بين الشركاء',
     'col_partner_name': 'اسم الشريك',
     'col_partner_pct': 'النسبة (%)',
-    'col_partner_gross': 'الحصة الإجمالية (${window.appSettings?.currency || ''})',
-    'col_partner_withdraw': 'المسحوبات (${window.appSettings?.currency || ''})',
-    'col_partner_net': 'صافي المتبقي (${window.appSettings?.currency || ''})',
+    'col_partner_gross': `الحصة الإجمالية (${window.appSettings?.currency || ''})`,
+    'col_partner_withdraw': `المسحوبات (${window.appSettings?.currency || ''})`,
+    'col_partner_net': `صافي المتبقي (${window.appSettings?.currency || ''})`,
     'finance_accountant_sign': 'توقيع المحاسب المالي',
     'manager_in_charge_sign': 'توقيع المدير المسؤول'
   };

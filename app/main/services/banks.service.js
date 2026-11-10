@@ -218,6 +218,7 @@ async function getBankTransactions(yearId, options = {}) {
   const requestedLimit = Number(options && options.limit);
   const limit = Number.isInteger(requestedLimit) && requestedLimit > 0 ? Math.min(requestedLimit, 500) : null;
   const offset = limit ? Math.max(Number(options.offset) || 0, 0) : 0;
+  const accountId = Number(options && options.accountId);
   let query = `
     SELECT t.*, 
            f.bank_name as from_bank_name,
@@ -228,9 +229,13 @@ async function getBankTransactions(yearId, options = {}) {
     LEFT JOIN BankAccounts f ON t.from_account_id = f.id
     LEFT JOIN BankAccounts o ON t.to_account_id = o.id
     WHERE t.year_id = ? AND COALESCE(t.is_voided, 0) = 0
-    ORDER BY t.tx_date DESC, t.id DESC
   `;
   const params = [yearId];
+  if (Number.isInteger(accountId) && accountId > 0) {
+    query += ' AND (t.from_account_id = ? OR t.to_account_id = ?)';
+    params.push(accountId, accountId);
+  }
+  query += ' ORDER BY t.tx_date DESC, t.id DESC';
   if (limit) {
     query += ' LIMIT ? OFFSET ?';
     params.push(limit, offset);

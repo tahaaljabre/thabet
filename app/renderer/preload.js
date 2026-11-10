@@ -1,7 +1,13 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
+  onFunctionShortcut: (callback) => {
+    const listener = (_event, key) => callback(key);
+    ipcRenderer.on('app-function-shortcut', listener);
+    return () => ipcRenderer.removeListener('app-function-shortcut', listener);
+  },
   getReportState: (dateStr, cashierName, yearId) => ipcRenderer.invoke('get-report-state', dateStr, cashierName, yearId),
+  getHomeActivity: (yearId) => ipcRenderer.invoke('get-home-activity', yearId),
   getReportByVoucherNumber: (voucherNum, yearId) => ipcRenderer.invoke('get-report-by-voucher', voucherNum, yearId),
   saveReportState: (state) => ipcRenderer.invoke('save-report-state', state),
   getAllPartners: (yearId) => ipcRenderer.invoke('get-all-partners', yearId),

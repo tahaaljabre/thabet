@@ -56,6 +56,7 @@ const standaloneSubTab = urlParams.get('tab') || null;
 const standaloneEntityId = urlParams.get('entityId') || null;
 const standaloneEntityName = urlParams.get('entityName') || null;
 const standaloneVoucherNumber = urlParams.get('voucherNumber') || null;
+const standaloneAccountId = urlParams.get('accountId') || null;
 const standaloneYearId = urlParams.get('yearId') || null;
 const standaloneYearName = urlParams.get('yearName') || null;
 
@@ -65,6 +66,7 @@ window.standaloneSubTab = standaloneSubTab;
 window.standaloneEntityId = standaloneEntityId;
 window.standaloneEntityName = standaloneEntityName;
 window.standaloneVoucherNumber = standaloneVoucherNumber;
+window.standaloneAccountId = standaloneAccountId;
 if (standaloneYearId && Number(standaloneYearId)) {
   window.currentYearId = Number(standaloneYearId);
 }
@@ -200,6 +202,14 @@ async function refreshSectionData(name, extra = {}) {
   } else if (name === 'banks') {
     if (typeof loadBanksData === 'function') await loadBanksData();
     if (typeof populateAccountDropdowns === 'function') await populateAccountDropdowns();
+    if (extra?.accountId) {
+      const select = document.getElementById('bank-tx-filter-account');
+      if (select && Array.from(select.options).some(option => option.value === String(extra.accountId))) {
+        select.value = String(extra.accountId);
+        if (typeof window.applyBankAccountFilter === 'function') await window.applyBankAccountFilter();
+        select.closest('.bank-history-actions')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
   } else if (name === 'employees') {
     if (typeof loadEmployees === 'function') await loadEmployees();
     if (typeof populateAccountDropdowns === 'function') await populateAccountDropdowns();
@@ -331,7 +341,8 @@ async function activateStandaloneSection(section = standaloneSection, subTab = s
   await refreshSectionData(section, {
     entityId: window.standaloneEntityId,
     entityName: window.standaloneEntityName,
-    voucherNumber: window.standaloneVoucherNumber
+    voucherNumber: window.standaloneVoucherNumber,
+    accountId: window.standaloneAccountId
   });
 }
 
@@ -354,6 +365,7 @@ async function switchTab(name, extra = {}) {
       entityId: extra?.entityId ? String(extra.entityId) : '',
       entityName: extra?.entityName ? String(extra.entityName) : '',
       voucherNumber: extra?.voucherNumber ? String(extra.voucherNumber) : '',
+      accountId: extra?.accountId ? String(extra.accountId) : '',
       title: companyTitle ? `${companyTitle} — ${sectionTitle}` : sectionTitle,
       user: window.currentUser || null,
       yearId: window.currentYearId || 1,
@@ -511,7 +523,8 @@ function setupMultiWindowListeners() {
         await refreshSectionData(section, {
           entityId: data?.entityId || '',
           entityName: data?.entityName || '',
-          voucherNumber: data?.voucherNumber || ''
+          voucherNumber: data?.voucherNumber || '',
+          accountId: data?.accountId || ''
         });
       }
     });
@@ -585,7 +598,7 @@ function setupGlobalKeyboardShortcuts() {
   window.__globalShortcutsInitialized = true;
 
   // Listen in capture phase (true) so child components or inputs cannot stop propagation
-  window.addEventListener('keydown', (e) => {
+  const handleShortcut = (e) => {
     const rawKey = String(e.key || '');
     const rawCode = String(e.code || '');
     const keyUpper = rawKey.toUpperCase();
@@ -597,6 +610,14 @@ function setupGlobalKeyboardShortcuts() {
       funcKey = keyUpper;
     } else if (/^F([1-9]|1[0-2])$/i.test(rawCode)) {
       funcKey = codeUpper;
+    }
+    const digit = /^DIGIT([0-9])$/.exec(codeUpper)?.[1] || (/^[0-9]$/.test(rawKey) ? rawKey : '');
+    if (!funcKey && e.ctrlKey && !e.altKey && !e.metaKey && digit) {
+      if (e.shiftKey) {
+        funcKey = digit === '1' ? 'F11' : digit === '2' ? 'F12' : '';
+      } else {
+        funcKey = digit === '0' ? 'F10' : `F${digit}`;
+      }
     }
 
     // Ctrl+L or Cmd+L: Lock App Session
@@ -621,8 +642,14 @@ function setupGlobalKeyboardShortcuts() {
       return;
     }
 
-    // Do not intercept if Alt/Ctrl/Meta is held
-    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    // Function keys and their Ctrl+number alternatives share the same actions.
+    if (e.altKey || e.metaKey || (e.ctrlKey && !funcKey)) return;
+    if (funcKey) {
+      const loginModal = document.getElementById('login-modal');
+      if (loginModal && loginModal.style.display !== 'none' && getComputedStyle(loginModal).display !== 'none') return;
+      const vipOverlay = document.getElementById('vip-lock-overlay');
+      if (vipOverlay && vipOverlay.style.display !== 'none') return;
+    }
 
     if (funcKey === 'F9') {
       e.preventDefault();
@@ -666,7 +693,16 @@ function setupGlobalKeyboardShortcuts() {
 
     e.preventDefault();
     switchTab(targetSection);
-  }, true);
+  };
+  window.addEventListener('keydown', handleShortcut, true);
+  window.api?.onFunctionShortcut?.((shortcut) => {
+    const data = typeof shortcut === 'string' ? { key: shortcut, code: shortcut } : shortcut;
+    if (!data) return;
+    handleShortcut({
+      key: data.key, code: data.code, ctrlKey: Boolean(data.ctrlKey), metaKey: false, altKey: false, shiftKey: Boolean(data.shiftKey),
+      preventDefault() {}
+    });
+  });
 }
 
 let cachedPaletteEntities = { yearId: null, at: 0, employees: [], suppliers: [] };
@@ -676,14 +712,14 @@ async function getCommandPaletteItems() {
   const items = [];
 
   const sectionList = [
-    { key: 'sales', icon: '💰', shortcut: 'F1', label: tr('menu_customers') },
-    { key: 'purchases', icon: '🛒', shortcut: 'F2', label: tr('menu_purchases') },
-    { key: 'suppliers', icon: '🚚', shortcut: 'F3', label: tr('menu_suppliers') },
-    { key: 'employees', icon: '👥', shortcut: 'F4', label: tr('menu_employees') },
-    { key: 'vault', icon: '🏦', shortcut: 'F5', label: tr('menu_vault') },
-    { key: 'banks', icon: '🏛️', shortcut: 'F6', label: tr('tab_btn_banks') },
-    { key: 'dashboard', icon: '📊', shortcut: 'F7', label: tr('menu_dashboard') },
-    { key: 'closing', icon: '🔒', shortcut: 'F8', label: tr('tab_btn_closing') }
+    { key: 'sales', icon: '💰', shortcut: 'Ctrl+1', label: tr('menu_customers') },
+    { key: 'purchases', icon: '🛒', shortcut: 'Ctrl+2', label: tr('menu_purchases') },
+    { key: 'suppliers', icon: '🚚', shortcut: 'Ctrl+3', label: tr('menu_suppliers') },
+    { key: 'employees', icon: '👥', shortcut: 'Ctrl+4', label: tr('menu_employees') },
+    { key: 'vault', icon: '🏦', shortcut: 'Ctrl+5', label: tr('menu_vault') },
+    { key: 'banks', icon: '🏛️', shortcut: 'Ctrl+6', label: tr('tab_btn_banks') },
+    { key: 'dashboard', icon: '📊', shortcut: 'Ctrl+7', label: tr('menu_dashboard') },
+    { key: 'closing', icon: '🔒', shortcut: 'Ctrl+8', label: tr('tab_btn_closing') }
   ];
 
   sectionList.forEach((sec) => {
@@ -1155,11 +1191,69 @@ async function toggleVipPrivacyBlur() {
   alert(nextState ? tr('privacy_mode_on_toast') : tr('privacy_mode_off_toast'));
 }
 
-function renderLiquidityTickerFromAccounts(sortedAccounts = []) {
-  const container = document.getElementById('liquidity-ticker-chips');
+function getHomeCashAlertThreshold() {
+  try {
+    const raw = localStorage.getItem('thabit_home_cash_alert_threshold');
+    if (raw !== null) {
+      const saved = Number(raw);
+      if (Number.isFinite(saved) && saved >= 0) return saved;
+    }
+  } catch (_) {}
+  return 1000;
+}
+
+function renderHomeAlerts() {
+  const container = document.getElementById('home-alerts');
   if (!container) return;
+  const tr = typeof t === 'function' ? t : (key) => key;
+  const bankData = window.__homeBankSnapshot;
+  const salesData = window.__homeSalesSnapshot;
+  const alerts = [];
+  if (bankData?.hasCashVault && bankData.cashVaultBal < getHomeCashAlertThreshold()) {
+    alerts.push({ label: tr('home_alert_low_cash'), action: () => switchTab('vault') });
+  }
+  (bankData?.banks || []).filter(bank => bank.balance < 0).forEach(bank => {
+    alerts.push({ label: tr('home_alert_negative_bank').replace('{name}', bank.name), action: () => switchTab('banks', { accountId: bank.id }) });
+  });
+  const today = typeof window.getLocalDateString === 'function' ? window.getLocalDateString() : '';
+  const hour = new Date().getHours();
+  if (salesData?.reportDate === today && hour >= 12 && salesData.targetAmt > 0) {
+    const expected = salesData.targetAmt * Math.min(1, hour / 24) * 0.7;
+    if (salesData.grossSales < expected) {
+      alerts.push({ label: tr('home_alert_sales_pace'), action: () => switchTab('sales') });
+    }
+  }
+  container.replaceChildren();
+  container.hidden = alerts.length === 0;
+  alerts.forEach(item => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'home-alert';
+    button.textContent = `● ${item.label}`;
+    button.addEventListener('click', item.action);
+    container.appendChild(button);
+  });
+}
+window.renderHomeAlerts = renderHomeAlerts;
+
+function openHomeAlertSettings() {
+  const tr = typeof t === 'function' ? t : (key) => key;
+  const value = window.prompt(tr('home_alert_settings_prompt'), String(getHomeCashAlertThreshold()));
+  if (value === null) return;
+  const threshold = Number(value);
+  if (value.trim() === '' || !Number.isFinite(threshold) || threshold < 0) {
+    window.alert(tr('home_alert_invalid_threshold'));
+    return;
+  }
+  try { localStorage.setItem('thabit_home_cash_alert_threshold', String(threshold)); } catch (_) {}
+  renderHomeAlerts();
+}
+window.openHomeAlertSettings = openHomeAlertSettings;
+
+function renderLiquidityTickerFromAccounts(sortedAccounts = []) {
+  const bankList = document.getElementById('home-bank-list');
+  if (!bankList) return;
   const tr = typeof t === 'function' ? t : (k) => k;
-  const esc = window.escapeHTML || ((v) => String(v ?? ''));
   const currency = window.appSettings?.currency || '';
 
   let cashVaultBal = 0;
@@ -1174,6 +1268,7 @@ function renderLiquidityTickerFromAccounts(sortedAccounts = []) {
     } else {
       banksTotalBal += bal;
       bankChips.push({
+        id: acc.id,
         name: acc.bank_name || acc.name || '',
         balance: bal
       });
@@ -1181,43 +1276,66 @@ function renderLiquidityTickerFromAccounts(sortedAccounts = []) {
   });
 
   const netLiquidity = cashVaultBal + banksTotalBal;
-  const fmt = (n) => `${esc(currency)}${Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  window.__homeBankSnapshot = {
+    hasCashVault: sortedAccounts.some(acc => acc.is_cash_vault === 1 || acc.is_cash_vault === true),
+    cashVaultBal,
+    banks: bankChips
+  };
+  renderHomeAlerts();
+  window.renderHomeActionCenter?.();
+  const lastUpdated = document.getElementById('home-last-updated');
+  if (lastUpdated) {
+    const time = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }).format(new Date());
+    lastUpdated.textContent = tr('home_last_updated').replace('{time}', time);
+  }
+  const homeCashBalance = document.getElementById('home-cash-balance');
+  if (homeCashBalance) homeCashBalance.textContent = `${currency}${cashVaultBal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const fmt = (n) => `${currency}${Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const setBalance = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) {
+      const next = fmt(value);
+      if (el.textContent !== next) {
+        el.textContent = next;
+        el.classList.remove('home-value-updated');
+        void el.offsetWidth;
+        el.classList.add('home-value-updated');
+      }
+      el.classList.toggle('negative', value < 0);
+    }
+  };
+  setBalance('home-liquidity-cash', cashVaultBal);
+  setBalance('home-liquidity-banks', banksTotalBal);
+  setBalance('home-liquidity-total', netLiquidity);
 
-  let html = `
-    <div class="liquidity-chip vault-chip" onclick="switchTab('vault')">
-      <span class="chip-icon">🏦</span>
-      <span class="chip-name">${esc(tr('liquidity_cash_vault'))}</span>
-      <strong class="chip-amount ${cashVaultBal < 0 ? 'neg' : 'pos'}" dir="ltr">${fmt(cashVaultBal)}</strong>
-    </div>
-    <div class="liquidity-chip banks-chip" onclick="switchTab('banks')">
-      <span class="chip-icon">🏛️</span>
-      <span class="chip-name">${esc(tr('liquidity_total_banks'))}</span>
-      <strong class="chip-amount ${banksTotalBal < 0 ? 'neg' : 'pos'}" dir="ltr">${fmt(banksTotalBal)}</strong>
-    </div>
-  `;
-
-  bankChips.slice(0, 3).forEach((b) => {
-    html += `
-      <div class="liquidity-chip sub-bank-chip" onclick="switchTab('banks')">
-        <span class="chip-name">${esc(b.name)}</span>
-        <strong class="chip-amount ${b.balance < 0 ? 'neg' : ''}" dir="ltr">${fmt(b.balance)}</strong>
-      </div>
-    `;
+  bankList.replaceChildren();
+  if (!bankChips.length) {
+    const empty = document.createElement('div');
+    empty.className = 'home-bank-empty';
+    empty.textContent = tr('home_no_bank_accounts');
+    bankList.appendChild(empty);
+  }
+  bankChips.forEach((bank) => {
+    const row = document.createElement('button');
+    row.type = 'button';
+    row.className = 'home-bank-row';
+    row.addEventListener('click', () => switchTab('banks', { accountId: bank.id }));
+    const name = document.createElement('span');
+    name.textContent = bank.name;
+    const amount = document.createElement('strong');
+    amount.dir = 'ltr';
+    amount.textContent = fmt(bank.balance);
+    amount.classList.toggle('negative', bank.balance < 0);
+    row.append(name, amount);
+    bankList.appendChild(row);
   });
-
-  html += `
-    <div class="liquidity-chip total-chip" onclick="switchTab('banks')">
-      <span class="chip-icon">💎</span>
-      <span class="chip-name">${esc(tr('liquidity_net_total'))}</span>
-      <strong class="chip-amount gold" dir="ltr">${fmt(netLiquidity)}</strong>
-    </div>
-  `;
-
-  container.innerHTML = html;
 }
 
 async function refreshLiquidityTicker() {
   if (window.isStandaloneWindow || !window.api?.getBankAccounts) return;
+  const bankList = document.getElementById('home-bank-list');
+  if (bankList && !bankList.children.length) bankList.textContent = t('loading');
+  bankList?.setAttribute('aria-busy', 'true');
   try {
     const yearId = window.currentYearId || 1;
     const rawAccounts = await window.api.getBankAccounts(yearId);
@@ -1231,6 +1349,9 @@ async function refreshLiquidityTicker() {
     renderLiquidityTickerFromAccounts(sorted);
   } catch (e) {
     console.error('Failed to refresh liquidity ticker:', e);
+    if (bankList) bankList.textContent = t('home_banks_load_error');
+  } finally {
+    bankList?.removeAttribute('aria-busy');
   }
 }
 
@@ -2647,18 +2768,18 @@ function toggleRoyalShortcutsModal() {
   const shortcuts = [
     { key: 'Ctrl + K', desc: tr('shortcut_desc_ctrl_k'), run: () => openLuxuryCommandPalette() },
     { key: 'Ctrl + L', desc: tr('shortcut_desc_ctrl_l'), run: () => lockAppSession() },
-    { key: 'F1', desc: tr('shortcut_desc_f1'), run: () => switchTab('sales') },
-    { key: 'F2', desc: tr('shortcut_desc_f2'), run: () => switchTab('purchases') },
-    { key: 'F3', desc: tr('shortcut_desc_f3'), run: () => switchTab('suppliers') },
-    { key: 'F4', desc: tr('shortcut_desc_f4'), run: () => switchTab('employees') },
-    { key: 'F5', desc: tr('shortcut_desc_f5'), run: () => switchTab('vault') },
-    { key: 'F6', desc: tr('shortcut_desc_f6'), run: () => switchTab('banks') },
-    { key: 'F7', desc: tr('shortcut_desc_f7'), run: () => switchTab('dashboard') },
-    { key: 'F8', desc: tr('shortcut_desc_f8'), run: () => switchTab('closing') },
-    { key: 'F9', desc: tr('shortcut_desc_f9'), run: () => toggleVipPrivacyBlur() },
-    { key: 'F10', desc: tr('shortcut_desc_f10'), run: () => toggleExecutiveCalculator() },
-    { key: 'F11', desc: tr('shortcut_desc_f11'), run: () => toggleRoyalStickyNotes() },
-    { key: 'F12', desc: tr('shortcut_desc_f12'), run: () => {} }
+    { key: 'Ctrl + 1', desc: tr('shortcut_desc_f1'), run: () => switchTab('sales') },
+    { key: 'Ctrl + 2', desc: tr('shortcut_desc_f2'), run: () => switchTab('purchases') },
+    { key: 'Ctrl + 3', desc: tr('shortcut_desc_f3'), run: () => switchTab('suppliers') },
+    { key: 'Ctrl + 4', desc: tr('shortcut_desc_f4'), run: () => switchTab('employees') },
+    { key: 'Ctrl + 5', desc: tr('shortcut_desc_f5'), run: () => switchTab('vault') },
+    { key: 'Ctrl + 6', desc: tr('shortcut_desc_f6'), run: () => switchTab('banks') },
+    { key: 'Ctrl + 7', desc: tr('shortcut_desc_f7'), run: () => switchTab('dashboard') },
+    { key: 'Ctrl + 8', desc: tr('shortcut_desc_f8'), run: () => switchTab('closing') },
+    { key: 'Ctrl + 9', desc: tr('shortcut_desc_f9'), run: () => toggleVipPrivacyBlur() },
+    { key: 'Ctrl + 0', desc: tr('shortcut_desc_f10'), run: () => toggleExecutiveCalculator() },
+    { key: 'Ctrl + Shift + 1', desc: tr('shortcut_desc_f11'), run: () => toggleRoyalStickyNotes() },
+    { key: 'Ctrl + Shift + 2', desc: tr('shortcut_desc_f12'), run: () => {} }
   ];
 
   const overlay = document.createElement('div');
