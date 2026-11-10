@@ -1,5 +1,6 @@
 async function exportClosingReportExcel() {
-  const figures = await window.api.calculateClosingFigures(window.currentYearId);
+  const targetYearId = window.currentYearId || (window.financialYears && window.financialYears[0]?.YearID) || 1;
+  const figures = await window.api.calculateClosingFigures(targetYearId);
   const distributable = Number(figures.distributable) || 0;
   const liquidity = (figures.bankBalances || []).reduce((sum, account) => sum + (Number(account.current_balance) || 0), 0);
   const currentWithdrawals = Object.fromEntries((figures.withdrawals || []).map(item => [item.partner_name, Number(item.total) || 0]));

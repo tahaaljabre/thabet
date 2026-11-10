@@ -180,6 +180,8 @@ function registerWindowHandlers(mainWindow) {
         entityId: entityId ? String(entityId) : '',
         entityName: entityName ? String(entityName) : '',
         voucherNumber: voucherNumber ? String(voucherNumber) : '',
+        yearId: yearId || '',
+        yearName: yearName !== undefined ? String(yearName) : '',
         isFreshOpen: !wasVisible
       });
       broadcastToAllWindows(mainWindow, 'open-sections-changed', getOpenSectionKeys());
@@ -274,7 +276,9 @@ function registerWindowHandlers(mainWindow) {
         tab: tabId || '',
         entityId: entityId ? String(entityId) : '',
         entityName: entityName ? String(entityName) : '',
-        voucherNumber: voucherNumber ? String(voucherNumber) : ''
+        voucherNumber: voucherNumber ? String(voucherNumber) : '',
+        yearId: yearId ? String(yearId) : '',
+        yearName: yearName !== undefined ? String(yearName) : ''
       }
     });
 

@@ -56,6 +56,8 @@ const standaloneSubTab = urlParams.get('tab') || null;
 const standaloneEntityId = urlParams.get('entityId') || null;
 const standaloneEntityName = urlParams.get('entityName') || null;
 const standaloneVoucherNumber = urlParams.get('voucherNumber') || null;
+const standaloneYearId = urlParams.get('yearId') || null;
+const standaloneYearName = urlParams.get('yearName') || null;
 
 window.isStandaloneWindow = Boolean(standaloneSection);
 window.standaloneSection = standaloneSection;
@@ -63,6 +65,12 @@ window.standaloneSubTab = standaloneSubTab;
 window.standaloneEntityId = standaloneEntityId;
 window.standaloneEntityName = standaloneEntityName;
 window.standaloneVoucherNumber = standaloneVoucherNumber;
+if (standaloneYearId && Number(standaloneYearId)) {
+  window.currentYearId = Number(standaloneYearId);
+}
+if (standaloneYearName) {
+  window.currentYearName = standaloneYearName;
+}
 
 if (standaloneSection) {
   document.documentElement.classList.add('standalone-os-window');
@@ -479,6 +487,12 @@ function setupMultiWindowListeners() {
   if (typeof window.api.onSectionWindowReopen === 'function') {
     window.api.onSectionWindowReopen(async (data) => {
       if (!window.isStandaloneWindow) return;
+      if (data?.yearId && Number(data.yearId)) {
+        window.currentYearId = Number(data.yearId);
+      }
+      if (data?.yearName) {
+        window.currentYearName = data.yearName;
+      }
       const section = data?.section || standaloneSection;
       const isFocusPulse = !data?.isFreshOpen;
       if (section === 'settings') {

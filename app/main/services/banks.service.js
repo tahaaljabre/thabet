@@ -39,6 +39,21 @@ async function ensureBankNameIsNotPartner(bankName, currentAccountId) {
 const alignedYears = new Set();
 
 async function getBankAccountsWithBalance(yearId) {
+  let targetYearId = Number(yearId);
+  if (!Number.isInteger(targetYearId) || targetYearId <= 0) {
+    const activeYear = await dbGet('SELECT YearID FROM FinancialYears WHERE IsClosed = 0 ORDER BY YearID DESC LIMIT 1')
+      || await dbGet('SELECT YearID FROM FinancialYears ORDER BY YearID DESC LIMIT 1');
+    targetYearId = activeYear ? activeYear.YearID : 1;
+  } else {
+    const exists = await dbGet('SELECT YearID FROM FinancialYears WHERE YearID = ?', [targetYearId]);
+    if (!exists) {
+      const fallbackYear = await dbGet('SELECT YearID FROM FinancialYears WHERE IsClosed = 0 ORDER BY YearID DESC LIMIT 1')
+        || await dbGet('SELECT YearID FROM FinancialYears ORDER BY YearID DESC LIMIT 1');
+      targetYearId = fallbackYear ? fallbackYear.YearID : 1;
+    }
+  }
+  yearId = targetYearId;
+
   let hasCash = await dbGet("SELECT id FROM BankAccounts WHERE year_id = ? AND is_cash_vault = 1", [yearId]);
   if (!hasCash) {
     const ins = await dbRun("INSERT INTO BankAccounts (bank_name, account_number, opening_balance, current_balance, start_date, year_id, is_cash_vault) VALUES (?, '', 0, 0, ?, ?, 1)", ['صندوق الكاش - Cash Vault', '2000-01-01', yearId]);

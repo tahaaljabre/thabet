@@ -8,10 +8,31 @@ async function calculateClosingFigures() {
   }
 
   try {
-    const activeYearObj = (window.financialYears || []).find(y => y.YearID === window.currentYearId);
+    if (!window.currentYearId || typeof window.currentYearId !== 'number') {
+      if (window.api && typeof window.api.getSessionContext === 'function') {
+        try {
+          const session = await window.api.getSessionContext();
+          if (session && session.yearId) {
+            window.currentYearId = Number(session.yearId);
+            window.currentYearName = session.yearName || '';
+          }
+        } catch (_) {}
+      }
+    }
+    if (!window.financialYears || window.financialYears.length === 0) {
+      if (window.api && typeof window.api.getFinancialYears === 'function') {
+        try {
+          window.financialYears = await window.api.getFinancialYears();
+        } catch (_) {}
+      }
+    }
+    const effectiveYearId = window.currentYearId || (window.financialYears && window.financialYears[0]?.YearID) || 1;
+    window.currentYearId = effectiveYearId;
+
+    const activeYearObj = (window.financialYears || []).find(y => y.YearID === effectiveYearId);
     const isYearClosedVal = activeYearObj ? activeYearObj.IsClosed === 1 : false;
 
-    const figures = await window.api.calculateClosingFigures(window.currentYearId);
+    const figures = await window.api.calculateClosingFigures(effectiveYearId);
     const formatMoney = value => (Number(value) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const employeeReceivables = Number(figures.employeeReceivables ?? figures.totalEmployeeReceivables ?? 0) || 0;
     const accountingNetProfit = Number(figures.accountingNetProfit ?? (Number(figures.netProfit || 0) + employeeReceivables)) || 0;
