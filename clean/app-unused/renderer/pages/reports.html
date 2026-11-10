@@ -1,0 +1,81 @@
+<div class="page-reports">
+  <div class="cashier-card">
+    <div class="card-label" style="margin-bottom:15px; font-size:16px; color:var(--lahmi2)">🏁 نظام إقفال السنة المالية وتوزيع الأرباح</div>
+    
+    <!-- Step display of closing calculations -->
+    <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 20px;">
+      <h4 style="margin-top:0; color: var(--primary);">حساب أرباح وخسائر السنة المالية الحالية</h4>
+      <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
+        <button id="btn-calc-closing" class="btn-primary" style="padding: 8px 16px; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s ease;">
+          <span class="btn-text">🔄 حساب الأرقام التشغيلية</span>
+        </button>
+      </div>
+
+      <div class="closing-dashboard">
+        <div class="closing-card">
+          <div class="closing-card-title">📈 <span data-i18n="lbl_closing_sales">إجمالي المبيعات</span></div>
+          <input type="text" id="closing-sales" class="closing-card-value" readonly>
+        </div>
+        <div class="closing-card">
+          <div class="closing-card-title">🛒 <span data-i18n="lbl_closing_expenses">إجمالي المصروفات</span></div>
+          <input type="text" id="closing-total-expenses" class="closing-card-value" readonly>
+          <div style="font-size: 11px; color: var(--muted); margin-top: 5px; text-align: center; direction: rtl;">
+            (مشتريات: <span id="closing-purchases-detail">0</span> | موظفين: <span id="closing-employees-detail">0</span> | تشغيل: <span id="closing-operating-detail">0</span>)
+          </div>
+        </div>
+        <div class="closing-card card-profit">
+          <div class="closing-card-title">💰 <span data-i18n="lbl_closing_netprofit">صافي الأرباح</span></div>
+          <input type="text" id="closing-netprofit" class="closing-card-value" readonly>
+        </div>
+        <div class="closing-card card-zakat">
+          <div class="closing-card-title">🤲 <span data-i18n="lbl_closing_zakat">الزكاة المستحقة (2.5%)</span></div>
+          <input type="text" id="closing-zakat" class="closing-card-value" readonly>
+        </div>
+        <div class="closing-card card-distrib" style="grid-column: 1 / -1; padding: 30px;">
+          <div class="closing-card-title" style="font-size: 18px; justify-content: center;">💎 <span data-i18n="lbl_closing_distributable">الأرباح القابلة للتوزيع</span></div>
+          <input type="text" id="closing-distributable" class="closing-card-value" readonly>
+        </div>
+      </div>
+    </div>
+
+    <!-- Partners Profit Distribution -->
+    <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 20px;">
+      <h4 style="margin-top:0; color: var(--primary);">توزيع الأرباح بين الشركاء</h4>
+      <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;" class="no-print">
+        <input type="text" id="partner-name" class="form-control" data-i18n="closing_partner_name" placeholder="اسم الشريك" style="flex:2; padding: 10px;">
+        <input type="number" id="partner-percentage" class="form-control" data-i18n="closing_partner_pct" placeholder="نسبة الشريك (%)" style="flex:1; padding: 10px;">
+        <button id="btn-add-closing-partner" class="btn-submit" style="margin: 0; padding: 10px 20px;" data-i18n="btn_add_partner">➕ إضافة شريك</button>
+      </div>
+      
+      <div class="table-container">
+        <table class="report-table professional-table" style="margin-bottom: 15px;">
+          <thead>
+            <tr>
+              <th data-i18n="col_partner_name">اسم الشريك</th>
+              <th data-i18n="col_partner_pct">النسبة (%)</th>
+              <th data-i18n="col_partner_gross">الحصة الإجمالية (฿)</th>
+              <th>المسحوبات السنوية (฿)</th>
+              <th data-i18n="col_partner_net">صافي الحصة المتبقية (฿)</th>
+              <th class="no-print">إجراء</th>
+            </tr>
+          </thead>
+          <tbody id="partners-tbody">
+            <!-- Rendered dynamically -->
+          </tbody>
+        </table>
+      </div>
+      
+      <div style="font-size:14px; font-weight:bold; color:var(--muted); text-align:right;" id="distribution-total-pct">إجمالي النسب الموزعة: 0%</div>
+    </div>
+
+    <!-- Submit and Lock -->
+    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+      <button class="btn-submit" id="btn-execute-closing" style="flex: 2; font-size: 16px; padding: 15px; background-color: var(--red); border-color: var(--red);">
+        🔒 تنفيذ إقفال السنة المالية وقفل الحسابات
+      </button>
+      <button class="btn-secondary" id="btn-print-closing-preview" style="flex: 1; font-size: 16px; padding: 15px;">
+        🖨️ طباعة تقرير الإقفال المالي
+      </button>
+    </div>
+  </div>
+</div>

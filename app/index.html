@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>مطعم حضرموت اليمن - التقرير اليومي</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="renderer/css/main.css">
+  <link rel="stylesheet" href="renderer/css/components.css">
+  <link rel="stylesheet" href="renderer/css/pages.css">
+  <link rel="stylesheet" href="renderer/css/pages/settings.css">
+  <link rel="stylesheet" href="renderer/css/print.css" media="print">
+</head>
+
+<body>
+
+  <div id="login-modal-root"></div>
+  <script src="renderer/js/templates/login-modal.js"></script>
+
+
+  <div id="app-header-root"></div>
+  <script src="renderer/js/templates/app-header.js"></script>
+
+  <!-- ══ MAIN ══ -->
+  <div class="main">
+
+    <!-- Hero Total -->
+    <div class="hero-card primary" style="animation-delay:.05s">
+      <div class="card-label"><span data-i18n="net_available_total">صافي المتوفر الكلي (المبيعات - المصروفات)</span>
+      </div>
+      <div class="card-amount" id="hero-total-sales"><span class="card-currency"><span
+            class="sys-currency"></span></span>0</div>
+      <div class="card-sub hero-sub-row">
+        <span data-i18n="net_full_day_available">صافي اليوم الكامل المتاح — نقد + إلكتروني</span>
+        <span class="hero-dod-badge" id="hero-dod-badge"></span>
+      </div>
+      <div class="prog-bar">
+        <div class="prog-fill" id="hero-total-sales-fill"
+          style="width:71.2%; background:linear-gradient(90deg,var(--kabd),var(--lahmi),var(--lahmi2));"></div>
+      </div>
+      <div class="luxury-sales-mix" id="hero-sales-mix">
+        <div class="luxury-mix-track">
+          <div class="luxury-mix-seg cash" id="mix-bar-cash" style="width: 34%"></div>
+          <div class="luxury-mix-seg network" id="mix-bar-network" style="width: 33%"></div>
+          <div class="luxury-mix-seg online" id="mix-bar-online" style="width: 33%"></div>
+        </div>
+        <div class="luxury-mix-legend">
+          <span class="luxury-mix-pill"><span class="mix-dot cash"></span><span data-i18n="sales_mix_cash">نقد</span> <b id="mix-pct-cash" dir="ltr">0%</b></span>
+          <span class="luxury-mix-pill"><span class="mix-dot network"></span><span data-i18n="sales_mix_network">شبكة</span> <b id="mix-pct-network" dir="ltr">0%</b></span>
+          <span class="luxury-mix-pill"><span class="mix-dot online"></span><span data-i18n="sales_mix_online">أونلاين</span> <b id="mix-pct-online" dir="ltr">0%</b></span>
+        </div>
+      </div>
+      <div class="luxury-target-gauge" id="hero-daily-target-gauge">
+        <div class="target-gauge-head">
+          <span class="target-gauge-lbl" data-i18n="daily_target_label">🎯 الهدف اليومي للمبيعات:</span>
+          <strong class="target-gauge-val" id="hero-target-val" dir="ltr">0</strong>
+          <span class="target-gauge-status" id="hero-target-status"></span>
+          <button type="button" class="target-edit-btn" onclick="openDailySalesTargetPrompt()" data-i18n="daily_target_edit_btn">تعديل الهدف</button>
+        </div>
+        <div class="target-gauge-track">
+          <div class="target-gauge-fill" id="hero-target-fill" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mini Cards -->
+    <div class="mini-grid">
+      <div class="mini-card" style="animation-delay:.10s">
+        <div class="dot-ind" style="background:var(--lahmi2);box-shadow:0 0 6px var(--lahmi2)"></div>
+        <div class="card-label"><span data-i18n="cash_sales">مبيعات نقد</span></div>
+        <div class="card-amount lahmi" id="display-cash-sales"><span style="font-size:11px;color:var(--muted)"><span
+              class="sys-currency"></span></span>0</div>
+        <div class="card-sub"><span data-i18n="net_actual_cash">صافي النقد الفعلي</span></div>
+      </div>
+      <div class="mini-card" style="animation-delay:.12s">
+        <div class="dot-ind" style="background:var(--beige3);box-shadow:0 0 6px var(--beige3)"></div>
+        <div class="card-label"><span data-i18n="network_sales">مبيعات شبكة</span></div>
+        <div class="card-amount" style="color:var(--beige3)" id="display-network-sales"><span
+            style="font-size:11px;color:var(--muted)"><span class="sys-currency"></span></span>0</div>
+        <div class="card-sub"><span data-i18n="cards_kbank">البطاقات (KBank)</span></div>
+      </div>
+      <div class="mini-card" style="animation-delay:.15s">
+        <div class="dot-ind" style="background:var(--green2);box-shadow:0 0 6px var(--green2)"></div>
+        <div class="card-label"><span data-i18n="online_sales">مبيعات أونلاين</span></div>
+        <div class="card-amount green" id="display-online-sales"><span style="font-size:11px;color:var(--muted)"><span
+              class="sys-currency"></span></span>0</div>
+        <div class="card-sub"><span data-i18n="delivery_apps">تطبيقات التوصيل والتحويل</span></div>
+      </div>
+    </div>
+
+    <!-- Live Liquidity & Vault Ticker -->
+    <div class="luxury-liquidity-ticker" id="luxury-liquidity-ticker">
+      <div class="liquidity-ticker-head">
+        <span class="liquidity-ticker-label" data-i18n="liquidity_ticker_title">💎 السيولة والأرصدة الحية الآن</span>
+        <button type="button" class="liquidity-refresh-btn" onclick="refreshLiquidityTicker()" data-i18n-title="liquidity_refresh_title" title="تحديث الأرصدة الحية">↻</button>
+      </div>
+      <div class="liquidity-ticker-chips" id="liquidity-ticker-chips"></div>
+    </div>
+
+    <!-- Section -->
+    <div class="section-title luxury-dock-header">
+      <div class="luxury-dock-title-group">
+        <span data-i18n="sales_channels_chart">📊 قنوات المبيعات</span>
+      </div>
+      <div class="luxury-dock-actions" id="open-windows-toolbar" style="display:none;">
+        <button type="button" class="luxury-dock-action-btn cascade-btn" id="btn-cascade-windows" onclick="cascadeOpenSectionWindows()">
+          <span data-i18n="window_cascade_all">🗂️ ترتيب النوافذ</span>
+        </button>
+        <button type="button" class="luxury-dock-action-btn close-all-btn" id="btn-close-all-windows" onclick="closeAllOpenSectionWindows()">
+          <span data-i18n="window_close_all">✖ إغلاق كل النوافذ</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs luxury-dock-grid" id="main-tabs-nav">
+      <button class="tab-btn" onclick="switchTab('sales')" data-icon="💰" data-shortcut="F1" data-i18n="menu_customers">المبيعات</button>
+      <button class="tab-btn" onclick="switchTab('purchases')" data-icon="🛒" data-shortcut="F2" data-i18n="menu_purchases">مشتريات</button>
+      <button class="tab-btn" onclick="switchTab('suppliers')" data-icon="🚚" data-shortcut="F3" data-i18n="menu_suppliers">الموردين</button>
+      <button class="tab-btn" onclick="switchTab('employees')" data-icon="👥" data-shortcut="F4" data-i18n="menu_employees">الموظفين</button>
+      <button class="tab-btn" onclick="switchTab('vault')" data-icon="🏦" data-shortcut="F5" data-i18n="menu_vault">الصندوق</button>
+      <button class="tab-btn" onclick="switchTab('banks')" id="tab-btn-banks" data-icon="🏛️" data-shortcut="F6" style="color: var(--primary-color);"
+        data-i18n="tab_btn_banks">🏛️ البنوك والحسابات</button>
+      <button id="tab-btn-dashboard" class="tab-btn" onclick="switchTab('dashboard')" data-icon="📊" data-shortcut="F7"
+        style="display:none; color: var(--primary);" data-i18n="menu_dashboard">📊 الشاشة التفاعلية</button>
+      <button class="tab-btn" onclick="switchTab('closing')" id="tab-btn-closing" data-icon="🔒" data-shortcut="F8" style="color: var(--red);"
+        data-i18n="tab_btn_closing">🔒 إغلاق السنة المالية</button>
+    </div>
+
+    <div id="banks-page-root"></div>
+    <script src="renderer/js/templates/pages/banks.js"></script>
+    <div id="employees-page-root"></div>
+    <script src="renderer/js/templates/pages/employees.js"></script>
+
+    <div id="sales-page-root"></div>
+    <script src="renderer/js/templates/pages/sales.js"></script>
+
+    <div id="purchases-page-root"></div>
+    <script src="renderer/js/templates/pages/purchases.js"></script>
+
+    <div id="suppliers-page-root"></div>
+    <script src="renderer/js/templates/pages/suppliers.js"></script>
+
+    <div id="vault-page-root"></div>
+    <script src="renderer/js/templates/pages/vault.js"></script>
+    <!-- ══ FOOTER ══ -->
+    <div class="footer-bar">
+      <div class="f-stat">
+        <div class="f-label" data-i18n="lbl_closing_sales">إجمالي المبيعات</div>
+        <div class="f-val" style="color:var(--lahmi2)" id="footer-total-sales"><span class="sys-currency"></span>0
+        </div>
+      </div>
+      <div class="f-div"></div>
+      <div class="f-stat">
+        <div class="f-label">المشتروات</div>
+        <div class="f-val" style="color:var(--red)" id="footer-total-purchases"><span class="sys-currency"></span>0
+        </div>
+      </div>
+      <div class="f-div"></div>
+      <div class="f-stat">
+        <div class="f-label">المتوفر الكلي</div>
+        <div class="f-val" style="color:var(--green2)" id="footer-total-available"><span class="sys-currency"></span>0
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══ MODAL FOR SINGLE MOVEMENT PRINT PREVIEW ══ -->
+
+    <div id="dashboard-page-root"></div>
+    <script src="renderer/js/templates/pages/dashboard.js"></script>
+    <div id="closing-page-root"></div>
+    <script src="renderer/js/templates/pages/closing.js"></script>
+    <!-- Year Selection Modal -->
+    <div id="year-selection-modal" class="modal no-print"
+      style="display: none; background: rgba(0,0,0,0.85); z-index: 9998; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
+      <div class="modal-content"
+        style="max-width: 400px; text-align: center; padding: 25px; border-radius: 12px; background: var(--panel-bg); color: var(--text-color); box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+        <h3 style="margin-top: 0; color: var(--primary); font-size: 20px; font-family: 'Cairo', sans-serif;">مرحباً بك
+          في نظام ثابت</h3>
+        <p style="font-size: 14px; margin-bottom: 20px; color: var(--muted);">هذه أول مرة تفتح فيها النظام أو لا توجد
+          سنة مالية. يرجى إنشاء سنة مالية:</p>
+        <select id="select-financial-year" class="form-control"
+          style="width: 100%; margin-bottom: 20px; padding: 10px; font-size: 16px; border-radius: 6px;"></select>
+        <button class="btn-submit" onclick="selectFinancialYear()"
+          style="width: 100%; margin-bottom: 10px; padding: 12px; font-size: 15px;">اختيار السنة</button>
+        <button class="btn-secondary" onclick="showCreateYearUI()"
+          style="width: 100%; margin-bottom: 10px; padding: 12px; font-size: 15px; background-color: #3b82f6; border-color: #3b82f6; color: white;">+
+          إضافة سنة جديدة</button>
+
+        <div id="create-year-container"
+          style="display: none; margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 15px;">
+          <input type="text" id="new-year-name" class="form-control" placeholder="اسم السنة (مثال: 2026)"
+            style="margin-bottom: 10px; padding: 10px;">
+          <button class="btn-submit" onclick="createNewFinancialYear()"
+            style="width: 100%; background-color: #10b981; border-color: #10b981; padding: 10px;">حفظ وبدء
+            العمل</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPLOYEE MODAL -->
+    <!-- ???? SALARY DISBURSEMENT MODAL ???? -->
+    <div id="salary-disburse-modal" class="modal no-print">
+      <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header">
+          <h3 id="salary-disburse-title" data-i18n="calculate_disburse_salary">احتساب وصرف الراتب</h3>
+          <button class="modal-close" onclick="closeDisburseSalaryModal()">×</button>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+          <div id="salary-disburse-details" style="font-size: 15px; line-height: 1.8;">
+            <!-- Salary details will be injected here -->
+          </div>
+
+          <div class="form-group" style="margin-top: 15px;">
+            <label data-i18n="disbursement_date">تاريخ الصرف</label>
+            <input type="date" id="salary-disburse-date" class="form-control" style="width: 100%;">
+          </div>
+          <div class="form-group" style="margin-top: 15px;">
+            <label data-i18n="notes_label">ملاحظات</label>
+            <input type="text" id="salary-disburse-notes" class="form-control" style="width: 100%;"
+              data-i18n-placeholder="salary_month_placeholder" placeholder="راتب شهر...">
+          </div>
+        </div>
+        <div class="modal-footer"
+          style="padding: 15px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px;">
+          <button class="btn-secondary" onclick="closeDisburseSalaryModal()" data-i18n="btn_cancel">إلغاء</button>
+          <button class="btn-submit" onclick="executeSalaryDisbursement()" id="btn-execute-disburse"
+            data-i18n="execute_disbursement">تنفيذ
+            الصرف</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="employee-modal" class="modal no-print">
+      <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-header">
+          <h3 id="employee-modal-title" data-i18n="add_employee_title">➕ إضافة موظف جديد</h3>
+          <button class="modal-close" onclick="closeEmployeeModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="emp-id">
+          <div class="form-group">
+            <label data-i18n="employee_name">اسم الموظف</label>
+            <input type="text" id="emp-name" class="form-control" data-i18n-placeholder="full_name_placeholder"
+              placeholder="الاسم الكامل">
+          </div>
+          <div class="form-group">
+            <label data-i18n="employee_photo_optional">صورة الموظف (اختياري)</label>
+            <input type="file" id="emp-photo-input" class="form-control" accept="image/*"
+              onchange="previewEmployeePhoto(event)">
+            <div style="text-align: center; margin-top: 10px;">
+              <img id="emp-photo-preview" src=""
+                style="display:none; max-width: 100px; max-height: 100px; border-radius: 8px; object-fit: cover; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            </div>
+            <input type="hidden" id="emp-photo-base64">
+          </div>
+          <div class="form-group">
+            <label data-i18n="customer_phone">رقم الهاتف</label>
+            <input type="text" id="emp-phone" class="form-control" data-i18n-placeholder="customer_phone"
+              placeholder="رقم الهاتف">
+          </div>
+          <div class="form-group">
+            <label data-i18n="employee_category_label">فئة الموظف</label>
+            <select id="emp-category" class="form-control">
+              <option value="" data-i18n="employee_category_none">-- بدون فئة (غير محدد) --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label data-i18n="basic_salary">الراتب الأساسي (<span class="sys-currency"></span>)</label>
+            <input type="number" id="emp-salary" class="form-control" step="any"
+              data-i18n-placeholder="monthly_salary_placeholder" placeholder="الراتب الشهري">
+          </div>
+          <div class="form-group">
+            <label data-i18n="work_start_date">تاريخ بداية العمل</label>
+            <input type="date" id="emp-start-date" class="form-control" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="closeEmployeeModal()" data-i18n="btn_cancel">إلغاء</button>
+          <button class="btn-submit" onclick="saveEmployee()" data-i18n="save_employee_button">💾 حفظ الموظف</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SALARY CHANGE MODAL -->
+    <div id="salary-change-modal" class="modal no-print">
+      <div class="modal-content" style="max-width: 450px;">
+        <div class="modal-header">
+          <h3 data-i18n="edit_basic_salary_title">📈 تعديل الراتب الأساسي للموظف</h3>
+          <button class="modal-close" onclick="closeSalaryChangeModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <div
+            style="background: var(--bg-color); padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 13px;">
+            <span data-i18n="salary_change_notice">ملاحظة: سيتم تطبيق هذا الراتب ابتداءً من التاريخ المحدد فقط، وستبقى
+              الرواتب السابقة في الكشوفات كما هي.</span>
+          </div>
+          <div class="form-group">
+            <label data-i18n="new_salary">الراتب الجديد (<span class="sys-currency"></span>)</label>
+            <input type="number" id="sc-new-salary" class="form-control" step="any"
+              data-i18n-placeholder="new_monthly_salary_placeholder" placeholder="الراتب الشهري الجديد">
+          </div>
+          <div class="form-group">
+            <label data-i18n="salary_effective_date">تاريخ سريان الراتب</label>
+            <input type="date" id="sc-effective-date" class="form-control">
+          </div>
+
+          <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 15px 0;">
+
+          <h4 data-i18n="salary_history">سجل الرواتب السابقة</h4>
+          <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px;">
+            <thead>
+              <tr style="background: var(--primary); color: white;">
+                <th style="padding: 5px; border: 1px solid var(--border-color);" data-i18n="salary_column">الراتب</th>
+                <th style="padding: 5px; border: 1px solid var(--border-color);" data-i18n="effective_date_column">تاريخ
+                  السريان</th>
+                <th style="padding: 5px; border: 1px solid var(--border-color);" data-i18n="th_action">إجراء</th>
+              </tr>
+            </thead>
+            <tbody id="sc-history-tbody">
+              <!-- Rows dynamically added -->
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="closeSalaryChangeModal()" data-i18n="btn_cancel">إلغاء</button>
+          <button class="btn-submit" onclick="saveSalaryChange()" data-i18n="save_changes">💾 حفظ التعديل</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- SUPPLIER MODAL -->
+    <div id="modal-supplier" class="modal no-print">
+      <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-header">
+          <h3 id="supplier-modal-title">➕ إضافة مورد جديد</h3>
+          <button class="modal-close" onclick="closeSupplierModal()">✖</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="sup-id">
+          <div class="form-group">
+            <label>اسم المورد</label>
+            <input type="text" id="sup-name" class="form-control" placeholder="أدخل الاسم">
+          </div>
+          <div class="form-group">
+            <label>رقم الهاتف</label>
+            <input type="text" id="sup-phone" class="form-control" placeholder="أدخل رقم الهاتف">
+          </div>
+          <div class="form-group">
+            <label>العنوان</label>
+            <input type="text" id="sup-address" class="form-control" placeholder="أدخل العنوان">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="closeSupplierModal()" data-i18n="btn_cancel">إلغاء</button>
+          <button class="btn-submit" onclick="saveSupplier()">💾 حفظ المورد</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- All Suppliers Report Modal -->
+    <div id="all-suppliers-report-modal" class="modal">
+      <div class="modal-content" style="max-width: 400px; padding: 25px; border-radius: 12px;">
+        <div class="modal-header" style="border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
+          <h3 data-i18n="all_suppliers_report" style="margin:0; color:var(--text); font-size: 20px;">📄 كشف عام للموردين
+          </h3>
+          <button class="modal-close" onclick="closeAllSuppliersReportModal()">✖</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom: 15px;">
+            <label data-i18n="date_from" style="font-weight:bold; display:block; margin-bottom:5px;">من تاريخ</label>
+            <input type="date" id="all-sup-start-date" class="form-control"
+              style="padding:10px; font-size:15px; width:100%;">
+          </div>
+          <div class="form-group" style="margin-bottom: 25px;">
+            <label data-i18n="date_to" style="font-weight:bold; display:block; margin-bottom:5px;">إلى تاريخ</label>
+            <input type="date" id="all-sup-end-date" class="form-control"
+              style="padding:10px; font-size:15px; width:100%;">
+          </div>
+          <div style="display:flex; justify-content:flex-end; gap:10px;">
+            <button class="btn-secondary" onclick="closeAllSuppliersReportModal()"
+              style="padding: 10px 20px; font-size:15px;" data-i18n="btn_cancel">إلغاء</button>
+            <button class="btn-submit" onclick="printAllSuppliersReport()" data-i18n="print_report"
+              style="padding: 10px 20px; font-size:15px;">🖨️ طباعة الكشف</button>
+            <button class="btn-submit" onclick="exportAllSuppliersExcel()"
+              style="padding: 10px 20px; font-size:15px; background:#217346;">📊 Excel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Partner Statement Modal -->
+    <div id="partner-statement-modal" class="modal">
+      <div class="modal-content" style="max-width: 400px; padding: 25px; border-radius: 12px;">
+        <div class="modal-header" style="border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
+          <h3 style="margin:0; color:var(--text); font-size: 20px;">📑 كشف حساب شريك</h3>
+          <button class="modal-close" onclick="closePartnerStatementModal()">✖</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom: 15px;">
+            <label style="font-weight:bold; display:block; margin-bottom:5px;">اسم الشريك</label>
+            <div style="display:flex; gap:10px;">
+              <select id="partner-statement-name" class="form-control" style="padding:10px; font-size:15px; flex:1;">
+                <option value="">-- اختر الشريك --</option>
+              </select>
+              <button class="btn-primary" onclick="openAddPartnerModal()"
+                style="padding: 10px; margin: 0; background-color: var(--kabd); white-space: nowrap;">+ إضافة
+                شريك</button>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom: 15px;">
+            <label style="font-weight:bold; display:block; margin-bottom:5px;">من تاريخ</label>
+            <input type="date" id="partner-statement-start-date" class="form-control"
+              style="padding:10px; font-size:15px; width:100%;">
+          </div>
+          <div class="form-group" style="margin-bottom: 25px;">
+            <label style="font-weight:bold; display:block; margin-bottom:5px;">إلى تاريخ</label>
+            <input type="date" id="partner-statement-end-date" class="form-control"
+              style="padding:10px; font-size:15px; width:100%;">
+          </div>
+          <div style="display:flex; justify-content:flex-end; gap:10px;">
+            <button class="btn-secondary" onclick="closePartnerStatementModal()"
+              style="padding: 10px 20px; font-size:15px;" data-i18n="btn_cancel">إلغاء</button>
+            <button class="btn-submit" onclick="printPartnerStatement()"
+              style="padding: 10px 20px; font-size:15px; background-color: var(--kabd);">🖨️ طباعة الكشف</button>
+            <button class="btn-submit" onclick="exportPartnerStatementExcel()"
+              style="padding: 10px 20px; font-size:15px; background:#217346;">📊 Excel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- All Employees Report Modal -->
+    <div id="all-employees-report-modal" class="modal">
+      <div class="modal-content" style="max-width: 400px; padding: 25px; border-radius: 12px;">
+        <div class="modal-header" style="border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
+          <h3 data-i18n="all_employees_report" style="margin:0; color:var(--text); font-size: 20px;">📄 كشف عام للموظفين
+          </h3>
+          <button class="modal-close" onclick="closeAllEmployeesReportModal()">✖</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom: 15px;">
+            <label data-i18n="employee_category_filter_label" style="font-weight:bold; display:block; margin-bottom:5px;">فئة الموظفين</label>
+            <select id="all-emp-category" class="form-control" style="padding:10px; font-size:15px; width:100%;">
+              <option value="all" data-i18n="all_employee_categories">جميع الفئات (الكل)</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 15px;">
+            <label data-i18n="date_from" style="font-weight:bold; display:block; margin-bottom:5px;">من تاريخ</label>
+            <input type="date" id="all-emp-start-date" class="form-control"
+              style="padding:10px; font-size:15px; width:100%;">
+          </div>
+          <div class="form-group" style="margin-bottom: 25px;">
+            <label data-i18n="date_to" style="font-weight:bold; display:block; margin-bottom:5px;">إلى تاريخ</label>
+            <input type="date" id="all-emp-end-date" class="form-control"
+              style="padding:10px; font-size:15px; width:100%;">
+          </div>
+          <div style="display:flex; justify-content:flex-end; gap:10px;">
+            <button class="btn-secondary" onclick="closeAllEmployeesReportModal()"
+              style="padding: 10px 20px; font-size:15px;" data-i18n="btn_cancel">إلغاء</button>
+            <button class="btn-submit" onclick="printAllEmployeesReport()" data-i18n="print_report"
+              style="padding: 10px 20px; font-size:15px;">🖨️ طباعة الكشف</button>
+            <button class="btn-submit" onclick="exportAllEmployeesExcel()"
+              style="padding: 10px 20px; font-size:15px; background:#217346;">📊 Excel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Archive Modal -->
+    <div id="archive-modal" class="modal no-print"
+      style="display:none; justify-content:center; align-items:center; z-index: 9999;">
+      <div id="archive-modal-content" class="modal-content"
+        style="max-width: 800px; padding: 20px; border-radius: 12px; width: 90%; position: relative; resize: both; overflow: auto; min-width: 300px; min-height: 250px;">
+        <div id="archive-modal-header" class="modal-header"
+          style="border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px; cursor: move; display: flex; justify-content: space-between; align-items: center; user-select: none;">
+          <h3 data-i18n="archive_title" style="margin:0; color:var(--text); font-size: 20px;">📦 أرشيف الحركات والملفات</h3>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button onclick="toggleArchiveCollapse()"
+              style="background: none; border: none; font-size: 16px; cursor: pointer; color: var(--text);">➖</button>
+            <button class="modal-close" onclick="closeArchiveModal()"
+              style="font-size: 20px; background: none; border: none; cursor: pointer; color: var(--text);">✖</button>
+          </div>
+        </div>
+        <div id="archive-modal-body" class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+          <!-- Archive Tabs -->
+          <div class="tabs" style="margin-bottom: 15px; display: flex; gap: 5px;">
+            <button class="tab-btn active" id="archive-tab-btn-emp" onclick="switchArchiveTab('emp')"
+              data-i18n="archived_employees">موظفون مؤرشفون</button>
+            <button class="tab-btn" id="archive-tab-btn-sup" onclick="switchArchiveTab('sup')"
+              data-i18n="archived_suppliers">موردون مؤرشفون</button>
+            <button class="tab-btn" id="archive-tab-btn-emptx" onclick="switchArchiveTab('emptx')"
+              data-i18n="archived_employee_txs">سندات موظفين مؤرشفة</button>
+            <button class="tab-btn" id="archive-tab-btn-suptx" onclick="switchArchiveTab('suptx')"
+              data-i18n="archived_supplier_txs">سندات موردين مؤرشفة</button>
+          </div>
+
+          <!-- Archive Sub-Panels -->
+          <div id="archive-panel-emp" class="archive-panel active">
+            <div class="table-container">
+              <table class="report-table professional-table" style="width: 100%;">
+                <thead>
+                  <tr>
+                    <th>الاسم</th>
+                    <th>الهاتف</th>
+                    <th>الراتب الأساسي</th>
+                    <th>إجراء</th>
+                  </tr>
+                </thead>
+                <tbody id="archive-emp-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="archive-panel-sup" class="archive-panel" style="display:none;">
+            <div class="table-container">
+              <table class="report-table professional-table" style="width: 100%;">
+                <thead>
+                  <tr>
+                    <th>الاسم</th>
+                    <th>الهاتف</th>
+                    <th>العنوان</th>
+                    <th>إجراء</th>
+                  </tr>
+                </thead>
+                <tbody id="archive-sup-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="archive-panel-emptx" class="archive-panel" style="display:none;">
+            <div class="table-container">
+              <table class="report-table professional-table" style="width: 100%;">
+                <thead>
+                  <tr>
+                    <th>الموظف</th>
+                    <th>التاريخ</th>
+                    <th>المبلغ</th>
+                    <th>ملاحظات</th>
+                    <th>إجراء</th>
+                  </tr>
+                </thead>
+                <tbody id="archive-emptx-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="archive-panel-suptx" class="archive-panel" style="display:none;">
+            <div class="table-container">
+              <table class="report-table professional-table" style="width: 100%;">
+                <thead>
+                  <tr>
+                    <th>المورد</th>
+                    <th>التاريخ</th>
+                    <th>النوع</th>
+                    <th>المبلغ</th>
+                    <th>ملاحظات</th>
+                    <th>إجراء</th>
+                  </tr>
+                </thead>
+                <tbody id="archive-suptx-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer" style="margin-top: 15px;">
+          <button class="btn-secondary" onclick="closeArchiveModal()" data-i18n="btn_cancel">إلغاء</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/lib/chart.umd.js"></script>
+  <!-- Dashboard Page Modules -->
+  <script src="renderer/js/pages/dashboard/charts.js"></script>
+  <script src="renderer/js/pages/dashboard/index.js"></script>
+  <script src="renderer/js/pages/dashboard/print.js"></script>
+  <script src="renderer/js/pages/dashboard/excel.js"></script>
+  <!-- Archive Page Modules -->
+  <script src="renderer/js/pages/archive/index.js"></script>
+  <script src="renderer/js/pages/archive/loaders.js"></script>
+  <script src="renderer/js/pages/archive/actions.js"></script>
+  <script src="renderer/js/pages/archive/modal.js"></script>
+  <script src="renderer/js/pages/archive/printing/employee.js"></script>
+  <script src="renderer/js/pages/archive/printing/supplier.js"></script>
+  <script src="renderer/js/pages/archive/printing/excel.js"></script>
+  <script src="renderer/js/pages/archive/printing/index.js"></script>
+  <!-- Settings & Cashiers Modals -->
+  <script src="renderer/js/pages/vault/vouchers/actions.js"></script>
+  <script src="renderer/js/pages/vault/vouchers/form.js"></script>
+  <script src="renderer/js/pages/vault/vouchers/print.js"></script>
+  <script src="renderer/js/pages/vault/vouchers.js"></script>
+  <!-- Closing Page Modules -->
+  <script src="renderer/js/pages/closing/state.js"></script>
+  <script src="renderer/js/pages/closing/partners.js"></script>
+  <script src="renderer/js/pages/closing/calculations.js"></script>
+  <script src="renderer/js/pages/closing/index.js"></script>
+  <script src="renderer/js/pages/closing/form.js"></script>
+  <script src="renderer/js/pages/closing/print-partner.js"></script>
+  <script src="renderer/js/pages/closing/print-closing.js"></script>
+  <script src="renderer/js/pages/closing/excel.js"></script>
+  <script src="renderer/js/pages/closing/print.js"></script>
+  <!-- Sales & Purchases Modules -->
+  <script type="module" src="renderer/js/bootstrap/sales-purchases.js"></script>
+  <!-- Banks Page Modules -->
+  <script src="renderer/js/pages/banks/index.js"></script>
+  <script src="renderer/js/pages/banks/reconciliation.js"></script>
+  <script src="renderer/js/pages/banks/accounts/form.js"></script>
+  <script src="renderer/js/pages/banks/transactions/table.js"></script>
+  <script src="renderer/js/pages/banks/transactions/form.js"></script>
+  <script src="renderer/js/pages/banks/transactions/actions.js"></script>
+  <script src="renderer/js/pages/banks/transactions/print.js"></script>
+  <script src="renderer/js/pages/banks/transactions/index.js"></script>
+  <script src="renderer/js/pages/banks/statements/modal.js"></script>
+  <script src="renderer/js/pages/banks/statements/report.js"></script>
+  <script src="renderer/js/pages/banks/statements/excel.js"></script>
+  <script src="renderer/js/pages/banks/statements/index.js"></script>
+  <script src="renderer/js/bootstrap/dropdowns.js"></script>
+  <div id="global-modals-root"></div>
+  <script type="module" src="renderer/js/bootstrap/global-modals.js"></script>
+
+
+  <!-- Core Scripts & Config -->
+  <script src="js/locales/ar.js"></script>
+  <script src="js/locales/en.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="renderer/js/lib/qrcode.min.js"></script>
+  <script src="renderer/js/core/event-bus.js"></script>
+  <script src="renderer/js/core/ui-helpers.js"></script>
+  <script src="renderer/js/core/init.js"></script>
+  <script src="renderer/js/core/print-engine/full-report.js"></script>
+  <script src="renderer/js/core/print-engine/voucher-data.js"></script>
+  <script src="renderer/js/core/print-engine/voucher-templates.js"></script>
+  <script src="renderer/js/core/print-engine.js"></script>
+
+  <!-- App Entry -->
+  <script type="module" src="renderer/js/app.js"></script>
+
+  <!-- Employees Page Modules -->
+  <script src="renderer/js/pages/employees/index.js"></script>
+  <script src="renderer/js/pages/employees/form.js"></script>
+  <script src="renderer/js/pages/employees/print.js"></script>
+  <script src="renderer/js/pages/employees/excel.js"></script>
+  <script src="renderer/js/pages/employees/print-voucher.js"></script>
+  <script src="renderer/js/pages/employees/print-all.js"></script>
+  <script src="renderer/js/pages/employees/ledger/list.js"></script>
+  <script src="renderer/js/pages/employees/ledger/actions.js"></script>
+  <script src="renderer/js/pages/employees/ledger/calculations.js"></script>
+  <script src="renderer/js/pages/employees/ledger/search.js"></script>
+  <script src="renderer/js/pages/employees/ledger.js"></script>
+  <script src="renderer/js/pages/employees/salary.js"></script>
+
+  <!-- Suppliers Page Modules -->
+  <script src="renderer/js/pages/suppliers/index.js"></script>
+  <script src="renderer/js/pages/suppliers/form.js"></script>
+  <script src="renderer/js/pages/suppliers/print.js"></script>
+  <script src="renderer/js/pages/suppliers/print-statement.js"></script>
+  <script src="renderer/js/pages/suppliers/excel.js"></script>
+  <script src="renderer/js/pages/suppliers/print-all.js"></script>
+  <script src="renderer/js/pages/suppliers/ledger.js"></script>
+
+  <!-- Vault Page Modules (Head) -->
+  <script type="module" src="renderer/js/pages/vault/index.js"></script>
+  <script src="renderer/js/pages/vault/reports.js"></script>
+  <script src="renderer/js/pages/vault/print-summary.js"></script>
+  <script src="renderer/js/pages/vault/print-detailed.js"></script>
+  <script src="renderer/js/pages/vault/excel.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,134 @@
+<div class="page-banks">
+  <!-- Banks dashboard cards -->
+  <div class="mini-grid" id="banks-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 20px;">
+    <!-- Populated dynamically -->
+  </div>
+
+  <!-- Forms Row -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; align-items: start;">
+    
+    <!-- Bank Account Create/Edit Form -->
+    <div class="cashier-card">
+      <div class="card-label" id="bank-form-title" style="margin-bottom:15px; color:var(--lahmi2)">➕ إضافة حساب بنكي جديد</div>
+      <input type="hidden" id="edit-bank-id" value="">
+      <div class="form-group" style="margin-bottom: 10px;">
+        <label class="form-label">اسم البنك / المحفظة</label>
+        <input type="text" id="bank-name-input" class="form-control" placeholder="مثال: KBank, Grab Wallet" style="padding:8px;">
+      </div>
+      <div class="form-group" style="margin-bottom: 10px;">
+        <label class="form-label">رقم الحساب</label>
+        <input type="text" id="bank-number-input" class="form-control" placeholder="أدخل رقم الحساب إن وجد" style="padding:8px;">
+      </div>
+      <div class="form-group" style="margin-bottom: 15px;">
+        <label class="form-label">الرصيد الافتتاحي (฿)</label>
+        <input type="number" id="bank-balance-input" class="form-control" step="any" placeholder="0.00" style="padding:8px;">
+      </div>
+      <div class="form-group" style="margin-bottom: 15px;">
+        <label class="form-label">تاريخ الرصيد الافتتاحي (بدء التتبع)</label>
+        <input type="date" id="bank-start-date-input" class="form-control" style="padding:8px;">
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn-primary" id="btn-save-bank-account" style="flex:1;">💾 حفظ الحساب</button>
+        <button class="btn-secondary" id="btn-reset-bank-form" style="width: 80px;">إلغاء</button>
+      </div>
+    </div>
+
+    <!-- Sales Channel Mapping Settings -->
+    <div class="cashier-card">
+      <div class="card-label" style="margin-bottom:15px; color:var(--lahmi2)">🔗 ربط قنوات المبيعات بالحسابات البنكية</div>
+      <div class="form-group" style="margin-bottom:10px;">
+        <label class="form-label">مبيعات بطاقات الشبكة (KBank)</label>
+        <select id="map-kbank" class="form-control bank-select-map" style="padding:8px; height:38px;"></select>
+      </div>
+      <div class="form-group" style="margin-bottom:10px;">
+        <label class="form-label">مبيعات تطبيق Grab</label>
+        <select id="map-grab" class="form-control bank-select-map" style="padding:8px; height:38px;"></select>
+      </div>
+      <div class="form-group" style="margin-bottom:10px;">
+        <label class="form-label">مبيعات تطبيق LineMan</label>
+        <select id="map-lineman" class="form-control bank-select-map" style="padding:8px; height:38px;"></select>
+      </div>
+      <div class="form-group" style="margin-bottom:15px;">
+        <label class="form-label">مبيعات بنك Krungsri</label>
+        <select id="map-krungsri" class="form-control bank-select-map" style="padding:8px; height:38px;"></select>
+      </div>
+      <button class="btn-primary" id="btn-save-bank-mappings" style="width: 100%;">💾 حفظ إعدادات الربط</button>
+    </div>
+
+  </div>
+
+  <!-- Bank Voucher Creation Form -->
+  <div class="cashier-card" style="margin-bottom: 20px;">
+    <div class="card-label" id="bank-tx-form-title" style="margin-bottom:15px; color:var(--lahmi2)">📝 سند بنكي جديد (صرف / قبض / تحويل / إيداع / سحب)</div>
+    <input type="hidden" id="edit-bank-tx-id" value="">
+    <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom:15px; gap: 10px;">
+      <div class="form-group">
+        <label class="form-label" style="font-size:12px;">التاريخ</label>
+        <input type="date" id="bank-tx-date" class="form-control" style="padding: 8px;">
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="font-size:12px;">نوع الحركة</label>
+        <select id="bank-tx-type" class="form-control" style="padding: 8px; height: 38px;">
+          <option value="Payment">صرف من البنك (Spend/Payment)</option>
+          <option value="Receipt">قبض إلى البنك (Receive/Receipt)</option>
+          <option value="Transfer">تحويل بين البنوك (Bank Transfer)</option>
+          <option value="Deposit">إيداع نقدي كاش من الصندوق للبنك (Cash Deposit)</option>
+          <option value="Withdrawal">سحب نقدي كاش من البنك للصندوق (Cash Withdrawal)</option>
+        </select>
+      </div>
+      <div class="form-group" id="bank-tx-from-group">
+        <label class="form-label" style="font-size:12px;">البنك المصدر (From)</label>
+        <select id="bank-tx-from" class="form-control bank-select-dropdown" style="padding: 8px; height: 38px;"></select>
+      </div>
+      <div class="form-group" id="bank-tx-to-group" style="display: none;">
+        <label class="form-label" style="font-size:12px;">البنك المستلم (To)</label>
+        <select id="bank-tx-to" class="form-control bank-select-dropdown" style="padding: 8px; height: 38px;"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="font-size:12px;">المبلغ (฿)</label>
+        <input type="number" id="bank-tx-amount" class="form-control" placeholder="0.00" style="padding: 8px;">
+      </div>
+      <div class="form-group" id="bank-tx-partner-group" style="display: none;">
+        <label class="form-label" style="font-size:12px;">اسم الشريك (اختياري)</label>
+        <input type="text" id="bank-tx-partner-name" class="form-control" placeholder="للمسحوبات أو التوزيعات" style="padding: 8px;">
+      </div>
+      <div class="form-group" style="grid-column: span 2;">
+        <label class="form-label" style="font-size:12px;">البيان / الوصف</label>
+        <input type="text" id="bank-tx-description" class="form-control" placeholder="أدخل تفاصيل العملية" style="padding: 8px;">
+      </div>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button class="btn-primary" id="btn-save-bank-tx" style="flex:1;">💾 حفظ السند البنكي</button>
+      <button class="btn-secondary" id="btn-reset-bank-tx-form" style="width: 100px;">إلغاء</button>
+    </div>
+  </div>
+
+  <!-- Recent Bank Transactions List -->
+  <div class="cashier-card">
+    <div class="card-label" style="margin-bottom:15px; color:var(--lahmi2); display:flex; justify-content:space-between; align-items:center;">
+      <span>📋 كشف العمليات والسندات البنكية الأخيرة</span>
+      <button class="btn-primary" id="btn-open-bank-statement-modal" style="padding: 4px 10px; font-size: 11px; margin: 0; background-color: var(--kabd);">📊 كشف حساب بنك تفصيلي</button>
+    </div>
+    <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+      <table class="report-table professional-table">
+        <thead>
+          <tr>
+            <th class="table-header">رقم السند</th>
+            <th class="table-header">التاريخ</th>
+            <th class="table-header">نوع الحركة</th>
+            <th class="table-header">البنك المصدر</th>
+            <th class="table-header">البنك المستلم</th>
+            <th class="table-header">الشريك</th>
+            <th class="table-header">المبلغ</th>
+            <th class="table-header">البيان / الوصف</th>
+            <th class="table-header">المسؤول</th>
+            <th class="table-header no-print">خيارات</th>
+          </tr>
+        </thead>
+        <tbody id="bank-tx-tbody">
+          <!-- Rendered dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

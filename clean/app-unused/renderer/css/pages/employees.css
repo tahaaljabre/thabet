@@ -1,0 +1,8 @@
+.page-employees {
+  padding: 16px;
+  animation: fadeUp 0.4s ease both;
+}
+
+.page-employees .dropdown-item:hover {
+  background-color: var(--border-color);
+}

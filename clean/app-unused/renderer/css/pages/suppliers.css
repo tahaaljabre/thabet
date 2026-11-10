@@ -1,0 +1,23 @@
+.page-suppliers {
+  padding: 16px;
+  animation: fadeUp 0.4s ease both;
+}
+
+.page-suppliers .dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.page-suppliers .text-red {
+  color: var(--red) !important;
+  font-weight: bold;
+}
+
+.page-suppliers .text-green {
+  color: var(--green2) !important;
+  font-weight: bold;
+}
+
+.page-suppliers .text-blue {
+  color: var(--lahmi) !important;
+  font-weight: bold;
+}

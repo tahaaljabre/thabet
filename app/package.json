@@ -1,0 +1,60 @@
+{
+  "name": "hadramout-desktop",
+  "version": "1.5.0",
+  "description": "Desktop app for Hadramout reports",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "check": "node scripts/check-js.js && node scripts/audit-secrets.js && node scripts/audit-i18n-keys.js && node scripts/audit-i18n-hardcoded.js",
+    "test": "jest",
+    "test:ci": "jest --runInBand --detectOpenHandles",
+    "verify": "npm run check && npm run test:ci"
+  },
+  "jest": {
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ],
+    "moduleNameMapper": {
+      "^electron$": "<rootDir>/__mocks__/electron.js"
+    }
+  },
+  "dependencies": {
+    "@google-cloud/local-auth": "^3.0.1",
+    "chart.js": "^4.4.2",
+    "electron-store": "^8.2.0",
+    "exceljs": "^4.4.0",
+    "googleapis": "^173.0.0",
+    "sqlite3": "^6.0.1"
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3",
+    "jest": "^30.4.2"
+  },
+  "build": {
+    "appId": "com.hadramout.thabit",
+    "productName": "Thabit",
+    "npmRebuild": false,
+    "asarUnpack": [
+      "**/*.node"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!**/credentials.json",
+      "!**/google_oauth_credentials.json",
+      "!**/google_drive_token.json"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false
+    }
+  }
+}

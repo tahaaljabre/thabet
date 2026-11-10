@@ -1,0 +1,205 @@
+<div class="page-settings">
+  <div class="settings-grid">
+    
+    <!-- Left Column: Settings Cards -->
+    <div class="settings-column">
+      
+      <!-- Theme & Language Card -->
+      <div class="cashier-card">
+        <div class="card-label" style="margin-bottom:15px; color:var(--lahmi2)">🎨 المظهر واللغة</div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+          <span>تفعيل الوضع الفاتح (اللون الأبيض)</span>
+          <label class="switch" style="position: relative; display: inline-block; width: 50px; height: 24px;">
+            <input type="checkbox" id="setting-theme-toggle" style="opacity: 0; width: 0; height: 0;">
+            <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; border-radius: 24px; transition: .4s;"></span>
+          </label>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border2); padding-top: 10px;">
+          <span>لغة البرنامج (Language)</span>
+          <select id="setting-language" class="form-control form-select" style="width: auto; padding: 5px;">
+            <option value="ar">العربية (Arabic)</option>
+            <option value="en">English (الإنجليزية)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Backup & Restore Card -->
+      <div class="cashier-card">
+        <div class="card-label" style="margin-bottom:15px; color:var(--lahmi2)">💾 الأمان والنسخ الاحتياطي</div>
+        <p style="font-size: 13px; color: var(--muted); margin-bottom: 15px;">احرص على أخذ نسخة احتياطية من قاعدة بياناتك بشكل دوري لتجنب فقدان البيانات.</p>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-submit" id="btn-trigger-backup" style="flex: 1; background-color: var(--green2); border-color: var(--green2); margin:0;">📥 أخذ نسخة احتياطية</button>
+          <button class="btn-secondary" id="btn-trigger-restore" style="flex: 1; margin:0;">📤 استعادة نسخة</button>
+        </div>
+      </div>
+
+      <!-- Commissions Card -->
+      <div class="cashier-card">
+        <div class="card-label" style="margin-bottom:15px; color:var(--lahmi2)">📊 عمولات منصات التوصيل</div>
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+          <div class="form-group">
+            <label class="form-label">نسبة عمولة GrabFood (%)</label>
+            <input type="number" id="setting-grab-commission" class="form-control" placeholder="مثال: 30" min="0" max="100" step="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">نسبة عمولة LineMan (%)</label>
+            <input type="number" id="setting-lineman-commission" class="form-control" placeholder="مثال: 30" min="0" max="100" step="1">
+          </div>
+        </div>
+        <p style="font-size:12px; color:var(--muted); margin-bottom:15px;">* سيتم الخصم تلقائياً من كشف الحساب البنكي عند حفظ أي تقرير يومي.</p>
+        <button class="btn-submit" id="btn-save-commissions" style="width:100%; margin:0;">حفظ عمولات التوصيل</button>
+      </div>
+
+      <!-- Company Info Card -->
+      <div class="cashier-card">
+        <div class="card-label" style="margin-bottom:15px; color:var(--lahmi2)">🏢 معلومات المطعم / الشركة</div>
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
+          <div class="form-group">
+            <label class="form-label">اسم المطعم</label>
+            <input type="text" id="setting-company-name" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">الرقم الضريبي</label>
+            <input type="text" id="setting-tax-number" class="form-control">
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label class="form-label">العنوان</label>
+            <input type="text" id="setting-address" class="form-control">
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label class="form-label">رقم الهاتف</label>
+            <input type="text" id="setting-phone" class="form-control">
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label class="form-label">يوم استحقاق الراتب الشهري (1 - 31)</label>
+            <input type="number" id="setting-salary-accrual-day" class="form-control" min="1" max="31" step="1" placeholder="مثال: 28" value="28">
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label class="form-label">شعار المطعم (Logo)</label>
+            <input type="file" id="setting-logo-upload" class="form-control" accept="image/*" style="padding: 5px;">
+            <div id="setting-logo-preview" style="margin-top: 10px; max-width: 100px; max-height: 100px; display: none;"></div>
+          </div>
+        </div>
+        <button class="btn-submit" id="btn-save-company-info" style="width:100%; margin:0;">💾 حفظ بيانات الشركة</button>
+      </div>
+
+      <!-- Danger Zone Card -->
+      <div class="cashier-card" style="border: 1px solid var(--red);">
+        <div class="card-label" style="margin-bottom:15px; color:var(--red)">⚠️ منطقة الخطر</div>
+        <p style="font-size: 13px; color: var(--muted); margin-bottom: 15px;">سيتم مسح جميع التقارير والمبيعات والمصروفات بالكامل. هذا الإجراء نهائي ولا يمكن التراجع عنه.</p>
+        <button class="btn-danger" id="btn-clear-all-data" style="width:100%; padding:10px;">🗑️ مسح كافة البيانات</button>
+      </div>
+
+    </div>
+
+    <!-- Right Column: User, Cashier, and Partner Lists -->
+    <div class="settings-column">
+
+      <!-- Users Management Card -->
+      <div class="cashier-card" id="setting-users-card" style="display: none;">
+        <div class="card-label" style="margin-bottom:15px; color:var(--lahmi2)">👥 إدارة المستخدمين</div>
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap:10px; margin-bottom: 10px;">
+           <input type="hidden" id="edit-user-id" value="">
+           <div class="form-group">
+             <label class="form-label">اسم المستخدم</label>
+             <input type="text" id="new-user-name" class="form-control" placeholder="اسم المستخدم">
+           </div>
+           <div class="form-group">
+             <label class="form-label">كلمة المرور</label>
+             <input type="password" id="new-user-pass" class="form-control" placeholder="كلمة المرور">
+           </div>
+        </div>
+        <div style="margin-bottom: 15px; font-size:13px; display:flex; gap:10px; flex-wrap: wrap;">
+           <label><input type="checkbox" id="perm-sales" checked> المبيعات</label>
+           <label><input type="checkbox" id="perm-employees" checked> الموظفين</label>
+           <label><input type="checkbox" id="perm-suppliers" checked> الموردين</label>
+           <label><input type="checkbox" id="perm-reports" checked> التقارير</label>
+           <label><input type="checkbox" id="perm-vault"> الصندوق</label>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+          <button id="btn-save-user" class="btn-submit" style="flex:1; margin:0;">حفظ المستخدم</button>
+          <button id="btn-cancel-edit-user" class="btn-secondary" style="flex:1; margin:0; display:none;">إلغاء</button>
+        </div>
+        <div class="table-container">
+          <table class="expenses-table">
+            <thead>
+              <tr>
+                <th style="text-align:right;">اسم المستخدم</th>
+                <th style="text-align:right;">الدور</th>
+                <th style="text-align:center;">إجراء</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Cashiers Management Card -->
+      <div class="cashier-card" id="setting-cashiers-card" style="display: none;">
+        <div class="card-label" style="margin-bottom:15px; color:var(--lahmi2)">🏧 إدارة الكاشيرات</div>
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap:10px; margin-bottom: 15px;">
+           <input type="hidden" id="edit-cashier-id" value="">
+           <div class="form-group">
+             <label class="form-label">اسم الكاشير</label>
+             <input type="text" id="new-cashier-name" class="form-control" placeholder="الدور الأول">
+           </div>
+           <div class="form-group">
+             <label class="form-label">الموظف المسؤول</label>
+             <input type="text" id="new-cashier-user" class="form-control" placeholder="اسم الموظف">
+           </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+          <button id="btn-save-cashier" class="btn-submit" style="flex:1; margin:0;">حفظ الكاشير</button>
+          <button id="btn-cancel-edit-cashier" class="btn-secondary" style="flex:1; margin:0; display:none;">إلغاء</button>
+        </div>
+        <div class="table-container">
+          <table class="expenses-table">
+            <thead>
+              <tr>
+                <th style="text-align:right;">اسم الكاشير</th>
+                <th style="text-align:right;">الموظف المسؤول</th>
+                <th style="text-align:center;">إجراء</th>
+              </tr>
+            </thead>
+            <tbody id="cashiers-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Partners Management Card -->
+      <div class="cashier-card" id="setting-partners-card" style="display: none;">
+        <div class="card-label" style="margin-bottom:15px; color:var(--lahmi2)">🤝 إدارة الشركاء</div>
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap:10px; margin-bottom: 15px;">
+           <input type="hidden" id="edit-partner-id" value="">
+           <input type="hidden" id="edit-partner-oldname" value="">
+           <div class="form-group">
+             <label class="form-label">اسم الشريك</label>
+             <input type="text" id="new-settings-partner-name" class="form-control" placeholder="اسم الشريك">
+           </div>
+           <div class="form-group">
+             <label class="form-label">رقم الهاتف</label>
+             <input type="text" id="new-settings-partner-phone" class="form-control" placeholder="جوال الشريك">
+           </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+          <button id="btn-save-settings-partner" class="btn-submit" style="flex:1; margin:0;">حفظ الشريك</button>
+          <button id="btn-cancel-edit-partner" class="btn-secondary" style="flex:1; margin:0; display:none;">إلغاء</button>
+        </div>
+        <div class="table-container">
+          <table class="expenses-table">
+            <thead>
+              <tr>
+                <th style="text-align:right;">اسم الشريك</th>
+                <th style="text-align:right;">رقم الهاتف</th>
+                <th style="text-align:center;">إجراء</th>
+              </tr>
+            </thead>
+            <tbody id="settings-partners-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+    
+  </div>
+</div>

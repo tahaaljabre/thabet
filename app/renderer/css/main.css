@@ -1,0 +1,330 @@
+
+:root {
+  --kabd:    #7B2D2D;
+  --kabd2:   #9B3A3A;
+  --lahmi:   #C4705A;
+  --lahmi2:  #D4896E;
+  --beige:   #F2E8D9;
+  --beige2:  #E8D9C4;
+  --beige3:  #D4C4A8;
+  --cream:   #FDF6ED;
+  --dark:    #2A1010;
+  --dark2:   #3D1818;
+  --card:    #3D1A1A;
+  --card2:   #4A2020;
+  --border:  rgba(196,112,90,0.25);
+  --border2: rgba(196,112,90,0.12);
+  --text:    #F2E8D9;
+  --muted:   #B8947A;
+  --green:   #5C9E6E;
+  --green2:  #7DBF8F;
+  --red:     #C94040;
+  --radius:  16px;
+  --radius-sm: 10px;
+  --font-family: 'Cairo', 'Tajawal', sans-serif;
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-lg: 18px;
+  --text-xl: 24px;
+  --text-amount: 28px;
+  --line-height-tight: 1.35;
+  --line-height-base: 1.7;
+  --control-height: 44px;
+  --control-height-compact: 30px;
+  --control-radius: 11px;
+  --space-control-x: 14px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --shadow-card: 0 10px 28px rgba(12, 4, 4, 0.16);
+  --shadow-card-hover: 0 14px 34px rgba(12, 4, 4, 0.22);
+  --surface-hover: rgba(196, 112, 90, 0.09);
+  --surface-active: rgba(196, 112, 90, 0.16);
+  --focus-ring: rgba(196, 112, 90, 0.28);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--text-base);
+  font-weight: 400;
+  line-height: var(--line-height-base);
+  background: var(--dark);
+  color: var(--text);
+  min-height: 100vh;
+  direction: rtl;
+  overflow-x: hidden;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+h1, h2, h3, h4,
+.page-title,
+.section-title,
+.card-title {
+  line-height: var(--line-height-tight);
+  text-wrap: balance;
+}
+
+.page-title {
+  font-size: var(--text-xl);
+  font-weight: 800;
+}
+
+.card-title {
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.helper-text,
+.text-muted-small {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  line-height: 1.65;
+}
+
+/* ══════════ HEADER ══════════ */
+.header {
+  background: linear-gradient(160deg, #1A0808 0%, #2A1010 40%, #1F0C0C 100%);
+  padding: 20px 18px 16px;
+  border-bottom: 2px solid var(--lahmi);
+  position: relative;
+  overflow: visible;
+}
+.header::before {
+  content:'';
+  position:absolute; top:-50px; right:-50px;
+  width:200px; height:200px;
+  background: radial-gradient(circle, rgba(196,112,90,0.15) 0%, transparent 70%);
+  border-radius:50%;
+}
+.header::after {
+  content:'';
+  position:absolute; bottom:-40px; left:-30px;
+  width:160px; height:160px;
+  background: radial-gradient(circle, rgba(123,45,45,0.18) 0%, transparent 70%);
+  border-radius:50%;
+}
+
+.header-inner {
+  display:flex; align-items:center; gap:14px;
+  position:relative; z-index:1;
+}
+
+.logo-box {
+  width:72px; height:72px;
+  border-radius:14px;
+  background: var(--beige);
+  border: 2px solid var(--lahmi);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+  overflow:hidden;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.4);
+}
+.logo-box img {
+  width:66px; height:66px;
+  object-fit:contain;
+}
+
+.header-info { flex:1; }
+.header-info h1 {
+  font-size:22px; font-weight:900;
+  color: var(--beige);
+  line-height:1.1;
+}
+.header-info .eng {
+  font-size:10px; font-weight:700;
+  color: var(--lahmi2);
+  letter-spacing:1px;
+  margin-top:1px;
+}
+.header-info .prepared {
+  font-size:10px;
+  color: var(--muted);
+  margin-top:4px;
+  display:flex; align-items:center; gap:4px;
+}
+.header-info .prepared span {
+  color: var(--lahmi2);
+  font-weight:700;
+}
+
+.date-badge {
+  background: var(--kabd);
+  border: 1px solid var(--lahmi);
+  border-radius:8px;
+  padding:5px 10px;
+  font-size:11px; font-weight:700;
+  color: var(--beige);
+  direction:ltr; white-space:nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* ══════════ MAIN ══════════ */
+.main { padding:16px 35px 100px 15px; }
+
+/* ══════════ FOOTER ══════════ */
+.footer-bar {
+  position:fixed; bottom:0; left:0; right:0;
+  background: rgba(26,8,8,0.97);
+  backdrop-filter:blur(16px);
+  border-top:2px solid var(--kabd);
+  padding:10px 18px;
+  display:flex; align-items:center; justify-content:space-between;
+  z-index:100;
+}
+.f-stat { text-align:center; }
+.f-label { font-size:9px; color:var(--muted); margin-bottom:2px; font-weight:700; }
+.f-val { font-family:'Cairo',sans-serif; font-size:13px; font-weight:900; direction:ltr; }
+.f-div { width:1px; height:26px; background:var(--border); }
+
+/* ══════════ ANIMATIONS ══════════ */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(14px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.breakdown-item:nth-child(1){animation-delay:.04s}
+.breakdown-item:nth-child(2){animation-delay:.08s}
+.breakdown-item:nth-child(3){animation-delay:.12s}
+.breakdown-item:nth-child(4){animation-delay:.16s}
+.breakdown-item:nth-child(5){animation-delay:.20s}
+.purchase-item:nth-child(odd){animation-delay:.04s}
+.purchase-item:nth-child(even){animation-delay:.08s}
+
+/* Light Theme Variables */
+body.light-theme {
+  --dark: #F5EBE1;          /* Overall Background */
+  --dark2: #EFE3D4;         /* Secondary Background */
+  --card: #EADBC8;          /* Card/Panel Background */
+  --card2: #DFCDA8;         /* Hover/Alt Card Background */
+  --text: #4E342E;          /* Dark Brown Text */
+  --muted: #8D6E63;         /* Muted Text */
+  --border: rgba(139, 69, 19, 0.25);
+  --border2: rgba(139, 69, 19, 0.15);
+  --lahmi: #A0522D;         /* Primary Highlights (Sienna) */
+  --lahmi2: #8B4513;        /* Active Tabs/Buttons (SaddleBrown) */
+  --kabd: #795548;          /* Headers */
+  --kabd2: #5D4037;         /* Darker Headers */
+  --beige: #FFFFFF;         /* Keep white for high contrast areas like logo box */
+  --green: #4CAF50;
+  --green2: #388E3C;
+  --red: #D32F2F;
+  --shadow-card: 0 8px 24px rgba(91, 60, 43, 0.09);
+  --shadow-card-hover: 0 13px 30px rgba(91, 60, 43, 0.14);
+  --surface-hover: rgba(160, 82, 45, 0.08);
+  --surface-active: rgba(160, 82, 45, 0.14);
+  --focus-ring: rgba(160, 82, 45, 0.24);
+}
+
+body.light-theme .header {
+  background: #EADBC8; /* Match the reference image header */
+  border-bottom: 2px solid var(--border);
+}
+
+body.light-theme .header::before,
+body.light-theme .header::after {
+  display: none; /* Remove dark mode glowing orbs */
+}
+
+body.light-theme .header-info h1 {
+  color: var(--kabd2);
+}
+
+body.light-theme .header-info .eng {
+  color: var(--muted);
+}
+
+body.light-theme .btn-primary {
+  background: var(--lahmi2);
+  color: #fff;
+}
+
+body.light-theme .tab.active {
+  background: var(--lahmi2);
+  color: #fff;
+  border-color: var(--lahmi2);
+}
+
+body.light-theme .tab {
+  background: var(--dark);
+  color: var(--kabd2);
+  border-color: var(--border);
+}
+
+body.light-theme .table-header {
+  background-color: #D7C4A5;
+  color: var(--kabd2);
+  border-bottom: 2px solid var(--border);
+}
+
+body.light-theme .table-row:hover {
+  background-color: #E2D1B3;
+}
+
+body.light-theme input, body.light-theme select {
+  background-color: #FCF9F5;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+body.light-theme .amount-display {
+  background-color: #FCF9F5;
+  color: var(--lahmi2);
+  font-weight: bold;
+}
+
+body.light-theme .total-summary {
+  background-color: #D7C4A5;
+  color: var(--text);
+}
+
+/* ══════════ CUSTOM SCROLLBAR ══════════ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--dark);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--card2);
+  border: 1px solid var(--dark);
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--lahmi);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--dark);
+}
+
+
+
+body.light-theme .settings-btn { background-color: #FFFFFF !important; }
+
+/* Numbers stay left-to-right and use Latin digits in both languages. */
+input[type="number"], input[type="date"], input[type="time"],
+.amount, .card-amount, .b-amount, .p-amount, .total-amount,
+.sum-amount, .c-val, .dash-value, .sys-currency, [data-number] {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+

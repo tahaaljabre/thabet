@@ -1,0 +1,108 @@
+<div class="page-sales">
+
+  <!-- Sales & Cashier Input Form (Hidden on Print) -->
+  <div class="cashier-card no-print" id="sales-input-card" style="margin-bottom: 20px;">
+    <div class="card-label" style="margin-bottom:15px; font-size:13px; color:var(--lahmi2)">
+      <span>💰 إدخال وتحديث مبيعات اليوم ومطابقة الكاشير</span>
+    </div>
+    
+    <!-- Date and Cashier Info -->
+    <div class="form-grid" style="margin-bottom: 15px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+      <div class="form-group">
+        <label class="form-label" for="input-report-date">تاريخ التقرير</label>
+        <input type="date" id="input-report-date" class="form-control" value="2026-06-07">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="select-report-cashier">الكاشير (Register)</label>
+        <select id="select-report-cashier" class="form-control form-select"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="input-cashier-user">المستلم الفعلي</label>
+        <input type="text" id="input-cashier-user" class="form-control" readonly>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="input-cashier-actual">المتوفر الفعلي بالكاشير (฿)</label>
+        <input type="number" id="input-cashier-actual" class="form-control" step="any" placeholder="أدخل المبلغ الفعلي في الدرج">
+      </div>
+    </div>
+
+    <!-- Income Sources Grid -->
+    <div class="form-grid" style="margin-bottom: 15px;">
+      <div class="form-group">
+        <label class="form-label" for="input-sales-cash">مبيعات الكاشير - نقد (على النظام)</label>
+        <input type="number" id="input-sales-cash" class="form-control" step="any" placeholder="0.00">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="input-sales-kbank">شبكة - KBank (البطاقات)</label>
+        <input type="number" id="input-sales-kbank" class="form-control" step="any" placeholder="0.00">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="input-sales-grab">جراب فود - Grab Food</label>
+        <input type="number" id="input-sales-grab" class="form-control" step="any" placeholder="0.00">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="input-sales-lineman">لاين مان - Lineman</label>
+        <input type="number" id="input-sales-lineman" class="form-control" step="any" placeholder="0.00">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="input-sales-krungsri">كرونغسري أونلاين - Krungsri Online</label>
+        <input type="number" id="input-sales-krungsri" class="form-control" step="any" placeholder="0.00">
+      </div>
+    </div>
+
+    <button type="button" class="btn-submit" id="btn-save-income" style="width: 100%; margin-top: 15px;">
+      <span>💾 حفظ المبيعات ومطابقة الكاشير</span>
+    </button>
+  </div>
+
+  <!-- Cashier Daily Reports Ledger Section -->
+  <div class="cashier-card" id="sales-history-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;" class="no-print">
+      <div class="card-label" style="font-size:16px; color:var(--lahmi2); font-weight:bold;">
+        <span>سجل حركات مبيعات الكاشير</span>
+      </div>
+      <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap: wrap;">
+        <div>
+          <label class="form-label" style="font-size:12px; font-weight:normal; margin-bottom: 2px; display: block;">رقم السند (بحث)</label>
+          <div style="display: flex; gap: 5px;">
+            <input type="number" id="input-voucher-search" class="form-control" placeholder="رقم السند" style="font-size:13px; padding:5px; height: auto; width: 120px;">
+            <button type="button" class="btn-primary" id="btn-search-voucher" style="padding: 5px 10px; margin: 0; font-size: 13px;">بحث</button>
+          </div>
+        </div>
+        <div>
+          <label class="form-label" style="font-size:12px; font-weight:normal; margin-bottom: 2px; display: block;">من تاريخ</label>
+          <input type="date" id="sales-print-from" class="form-control" style="font-size:13px; padding:5px; height: auto;">
+        </div>
+        <div>
+          <label class="form-label" style="font-size:12px; font-weight:normal; margin-bottom: 2px; display: block;">إلى تاريخ</label>
+          <input type="date" id="sales-print-to" class="form-control" style="font-size:13px; padding:5px; height: auto;">
+        </div>
+        <button type="button" class="btn-secondary" id="btn-print-sales-statement" style="padding: 10px 15px; margin-top: 14px;">🖨️ طباعة كشف مبيعات الكاشير</button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="report-table professional-table">
+        <thead>
+          <tr>
+            <th class="table-header">م</th>
+            <th class="table-header">رقم السند</th>
+            <th class="table-header">التاريخ</th>
+            <th class="table-header">نقد</th>
+            <th class="table-header">KBank</th>
+            <th class="table-header">Grab</th>
+            <th class="table-header">Lineman</th>
+            <th class="table-header">Krungsri</th>
+            <th class="table-header">الفعلي</th>
+            <th class="table-header">الفرق</th>
+            <th class="table-header no-print">خيارات</th>
+          </tr>
+        </thead>
+        <tbody id="sales-tx-tbody">
+          <!-- Dynamic Data -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

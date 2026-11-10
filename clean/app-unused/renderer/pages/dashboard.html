@@ -1,0 +1,83 @@
+<div class="page-dashboard">
+  <div class="dashboard-header no-print">
+    <h2 style="color: var(--primary); margin: 0; font-size: 24px;">الشاشة التفاعلية والإحصائيات</h2>
+    <div class="dashboard-filters" style="display:flex; align-items:center; gap:10px;">
+      <input type="date" id="dash-start-date" class="form-control" style="width: auto; padding: 6px 12px; height: 38px;">
+      <span style="color:#64748b; font-weight:bold;">إلى</span>
+      <input type="date" id="dash-end-date" class="form-control" style="width: auto; padding: 6px 12px; height: 38px;">
+      <button type="button" class="btn-submit" id="btn-refresh-dash" style="margin-top:0; padding:8px 15px; font-size:14px; height:38px;">
+        <span>🔄 تحديث</span>
+      </button>
+      <button type="button" class="btn-submit" id="btn-print-dash" style="margin-top:0; padding:8px 15px; font-size:14px; height:38px; background-color:#0284c7; border-color:#0284c7;">
+        <span>🖨️ طباعة</span>
+      </button>
+    </div>
+  </div>
+  
+  <div class="dash-summary-cards" style="margin-top: 20px;">
+    <div class="dash-card sales-card">
+      <div class="dash-icon" style="background:#dbeafe; color:#2563eb;">🛒</div>
+      <div class="dash-info">
+        <p>إجمالي المبيعات</p>
+        <h3 id="dash-val-totalsales" style="color: #2563eb; direction: ltr; text-align: left;">฿0.00</h3>
+      </div>
+    </div>
+    <div class="dash-card purchases-card">
+      <div class="dash-icon" style="background:#fee2e2; color:#dc2626;">📦</div>
+      <div class="dash-info">
+        <p>إجمالي المشتريات</p>
+        <h3 id="dash-val-totalpurchases" style="color: #dc2626; direction: ltr; text-align: left;">฿0.00</h3>
+      </div>
+    </div>
+    <div class="dash-card profit-card">
+      <div class="dash-icon">📈</div>
+      <div class="dash-info">
+        <p>صافي الأرباح</p>
+        <h3 id="dash-val-profit" style="color: #2e7d32; direction: ltr; text-align: left;">฿0.00</h3>
+      </div>
+    </div>
+    <div class="dash-card deficit-card">
+      <div class="dash-icon">📉</div>
+      <div class="dash-info">
+        <p>عجز مالي</p>
+        <h3 id="dash-val-deficit" style="color: #dc2626; direction: ltr; text-align: left;">฿0.00</h3>
+      </div>
+    </div>
+    <div class="dash-card debt-card">
+      <div class="dash-icon">💰</div>
+      <div class="dash-info">
+        <p>إجمالي الديون (للموردين)</p>
+        <h3 id="dash-val-debts" style="color: #b91c1c; direction: ltr; text-align: left;">฿0.00</h3>
+      </div>
+    </div>
+    <div class="dash-card sal-card">
+      <div class="dash-icon">👥</div>
+      <div class="dash-info">
+        <p>رواتب ومسحوبات الموظفين</p>
+        <h3 id="dash-val-salaries" style="color: #0f766e; direction: ltr; text-align: left;">฿0.00</h3>
+      </div>
+    </div>
+    <div class="dash-card expenses-card">
+      <div class="dash-icon" style="background:#fef3c7; color:#d97706;">💸</div>
+      <div class="dash-info">
+        <p>إجمالي المصروفات</p>
+        <h3 id="dash-val-total-expenses" style="color: #d97706; direction: ltr; text-align: left;">฿0.00</h3>
+      </div>
+    </div>
+  </div>
+  
+  <div class="dash-charts-grid" style="margin-top: 25px;">
+    <div class="dash-chart-container" style="grid-column: span 2;">
+      <h3>المبيعات مقابل المصروفات (يومياً)</h3>
+      <canvas id="barChart"></canvas>
+    </div>
+    <div class="dash-chart-container">
+      <h3>توزيع المصروفات</h3>
+      <canvas id="doughnutChart"></canvas>
+    </div>
+    <div class="dash-chart-container" style="grid-column: span 3;">
+      <h3>مسار الأرباح والإيرادات</h3>
+      <canvas id="lineChart"></canvas>
+    </div>
+  </div>
+</div>

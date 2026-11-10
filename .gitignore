@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+*.log
+*.tmp
+
+# Databases (production data — never commit)
+*.sqlite
+*.sqlite3
+*.sqlite-shm
+*.sqlite-wal
+*.db
+
+# Local scratch artifacts
+tmp/
+preview_report*.html
+
+# OAuth credentials and authorization tokens — always external to the project
+credentials.json
+**/credentials.json
+*client*secret*.json
+**/*client*secret*.json
+google_oauth_credentials.json
+**/google_oauth_credentials.json
+google_drive_token.json
+**/google_drive_token.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+
+# Legacy one-off patch scripts (do not commit)
+patch*.js
+fix*.js
+apply*.js
+add*.js
+seed*.js
+split*.js
+inject*.js
+rebuild*.js
+translate*.js
+migrate*.js
+test*.js

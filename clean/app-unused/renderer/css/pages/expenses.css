@@ -1,0 +1,59 @@
+.page-expenses {
+  padding: 16px;
+  animation: fadeUp 0.4s ease both;
+}
+
+.expenses-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.expenses-table th, .expenses-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border2);
+  font-size: 13px;
+}
+
+.expenses-table th {
+  color: var(--muted);
+  font-weight: 700;
+  text-align: right;
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.expenses-table td {
+  color: var(--text);
+}
+
+.expenses-table tr:hover {
+  background-color: rgba(255, 255, 255, 0.01);
+}
+
+.page-expenses .filters {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.page-expenses .filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.page-expenses .btn-ghost {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 8px 15px;
+  border-radius: 6px;
+}
+
+.page-expenses .btn-ghost:hover {
+  color: var(--text);
+  background-color: rgba(255, 255, 255, 0.05);
+}

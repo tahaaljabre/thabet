@@ -1,0 +1,103 @@
+<div class="page-employees">
+  <!-- Top actions -->
+  <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:15px;" class="no-print">
+    <button class="btn-submit" id="btn-add-employee" style="flex:1; min-width: 150px; padding: 12px; font-size: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">➕ إضافة موظف</button>
+    <button class="btn-secondary" id="btn-all-employees-report" style="flex:1; min-width: 150px; padding: 12px; font-size: 15px; background-color: #334155; color: white; border: none; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; transition: 0.2s;">📄 كشف عام للموظفين</button>
+    <div style="position: relative; flex:3; min-width: 250px;">
+      <input type="text" id="select-employee-input" class="form-control" placeholder="🔍 ابحث أو اختر الموظف..." style="width: 100%; padding: 12px; font-size: 15px; border-radius: 8px; border: 1px solid #cbd5e1;" autocomplete="off">
+      <div id="employee-dropdown-list" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--panel-bg); color: var(--text-color); border: 1px solid var(--border-color); max-height: 250px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border-radius: 4px;"></div>
+    </div>
+  </div>
+
+  <!-- Employee Management Panel -->
+  <div id="employee-management-panel" style="display:none;">
+    
+    <!-- Transactions Input -->
+    <div class="cashier-card no-print" style="margin-bottom: 20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <div style="display:flex; align-items:center; gap: 20px;">
+          <img id="emp-header-photo" src="" style="display:none; width: 100px; height: 100px; border-radius: 8px; object-fit: cover; border: 2px solid var(--border-color); box-shadow: 0 4px 8px rgba(0,0,0,0.15); cursor: zoom-in;">
+          <div class="card-label" style="font-size:16px; color:var(--lahmi2); font-weight:bold;"><span>📝 تسجيل حركة للموظف</span></div>
+        </div>
+        <div style="display:flex; gap:5px;">
+          <button class="btn-secondary" style="padding:4px 8px; font-size:11px;" id="btn-change-salary">📈 تعديل راتب</button>
+          <button class="btn-secondary" style="padding:4px 8px; font-size:11px;" id="btn-edit-employee">✏️ بيانات الموظف</button>
+          <button class="btn-primary" style="padding:4px 8px; font-size:11px;" id="btn-archive-employee">📦 أرشيف</button>
+          <button class="btn-danger" style="padding:4px 8px; font-size:11px;" id="btn-delete-employee">🗑️ حذف</button>
+        </div>
+      </div>
+      
+      <div class="form-grid" style="margin-bottom: 15px;">
+        <div class="form-group">
+          <label class="form-label">التاريخ</label>
+          <input type="date" id="emp-tx-date" class="form-control">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">المبلغ المدفوع (฿)</label>
+          <input type="number" id="emp-tx-amount" class="form-control" step="any" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">طريقة الدفع (الحساب)</label>
+          <select id="emp-tx-account" class="form-control account-dropdown"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">أيام الحضور</label>
+          <input type="number" id="emp-tx-attendance" class="form-control" step="any" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">أيام الغياب</label>
+          <input type="number" id="emp-tx-absence" class="form-control" step="any" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">الخصم (฿)</label>
+          <input type="number" id="emp-tx-deductions" class="form-control" step="any" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">البدلات (฿)</label>
+          <input type="number" id="emp-tx-allowances" class="form-control" step="any" value="0">
+        </div>
+        <div class="form-group" style="grid-column: span 2;">
+          <label class="form-label">ملاحظات</label>
+          <input type="text" id="emp-tx-notes" class="form-control" placeholder="ملاحظات الحركة">
+        </div>
+      </div>
+      
+      <div style="display:flex; gap:10px; align-items:flex-end;">
+        <button class="btn-submit" id="btn-save-employee-tx" style="flex:1;"><span>💾 حفظ الحركة</span></button>
+      </div>
+      <div style="display:flex; gap:10px; align-items:flex-end; margin-top:15px; padding-top:15px; border-top:1px dashed #d8d0c1;">
+        <div style="flex:1;">
+          <label class="form-label" style="font-size:12px; font-weight:normal;">من تاريخ (اختياري)</label>
+          <input type="date" id="emp-print-from" class="form-control" style="font-size:13px; padding:5px;">
+        </div>
+        <div style="flex:1;">
+          <label class="form-label" style="font-size:12px; font-weight:normal;">إلى تاريخ (اختياري)</label>
+          <input type="date" id="emp-print-to" class="form-control" style="font-size:13px; padding:5px;">
+        </div>
+        <button class="btn-secondary" id="btn-print-employee-statement" style="flex:1;"><span>🖨️ كشف حساب</span></button>
+      </div>
+    </div>
+
+    <!-- Transactions History Table -->
+    <div class="table-container">
+      <table class="report-table professional-table">
+        <thead>
+          <tr>
+            <th class="table-header">م</th>
+            <th class="table-header">التاريخ</th>
+            <th class="table-header">المبلغ</th>
+            <th class="table-header">حضور/غياب</th>
+            <th class="table-header">خصم/بدل</th>
+            <th class="table-header">ملاحظات</th>
+            <th class="table-header no-print">خيارات</th>
+          </tr>
+        </thead>
+        <tbody id="emp-tx-tbody">
+          <!-- Dynamic Data -->
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>

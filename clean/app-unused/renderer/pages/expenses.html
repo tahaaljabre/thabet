@@ -1,0 +1,102 @@
+<!-- Expenses & Vouchers Entry -->
+<div class="page-expenses">
+  <div class="cashier-card no-print" style="margin-bottom: 20px;">
+    <div class="card-label" style="margin-bottom:15px; font-size:13px; color:var(--lahmi2)">
+      <span>💸 إدخال المصروفات وسندات الصرف تفصيلياً</span>
+    </div>
+    
+    <!-- Date Picker and Cashier Selection -->
+    <div class="form-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 15px; gap: 15px;">
+      <div class="form-group">
+        <label class="form-label" for="expense-report-date">📅 تاريخ السند / الحركة (Voucher Date)</label>
+        <input type="date" id="expense-report-date" class="form-control">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="expense-cashier-select">👤 الكاشير / نقطة البيع</label>
+        <select id="expense-cashier-select" class="form-control form-select"></select>
+      </div>
+    </div>
+
+    <!-- Form inputs for individual item -->
+    <div class="form-grid" style="grid-template-columns: 1fr 1fr; margin-bottom:15px; gap:15px;">
+      <div class="form-group">
+        <label class="form-label" for="expense-name">بيان المصروف (الاسم / السند)</label>
+        <input type="text" id="expense-name" class="form-control" placeholder="مثال: خضار وفواكه، راتب محمد">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="expense-qty">الكمية / التفاصيل (اختياري)</label>
+        <input type="text" id="expense-qty" class="form-control" placeholder="مثال: 5 كجم، دفعة رقم 2">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="expense-amount">مبلغ المصروف (฿)</label>
+        <input type="number" id="expense-amount" class="form-control" step="any" placeholder="0.00">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="expense-category">فئة المصروف</label>
+        <select id="expense-category" class="form-control form-select">
+          <option value="food">مواد غذائية (Food Items)</option>
+          <option value="macro_veg">ماكرو وخضار (Macro & Vegetables)</option>
+          <option value="maintenance">صيانة وتشغيل (Maintenance)</option>
+          <option value="salaries">رواتب وأجور (Salaries & Wages)</option>
+          <option value="other">مصروفات نثرية أخرى (Others)</option>
+        </select>
+      </div>
+      <div class="form-group" style="grid-column: span 2;">
+        <label class="form-label" for="expense-account">طريقة الدفع (الحساب)</label>
+        <select id="expense-account" class="form-control form-select account-dropdown"></select>
+      </div>
+    </div>
+    
+    <button type="button" class="btn-submit" id="btn-add-expense-item" style="width: 100%; margin-bottom: 20px;">
+      <span>➕ إضافة المصروف للمسودة</span>
+    </button>
+
+    <!-- Draft expenses table -->
+    <div class="card-label" style="margin-bottom:10px; font-size:12px; color:var(--muted)">
+      <span>📋 المصروفات الحالية بالتقرير (مسودة):</span>
+    </div>
+    <div class="scroll-container" style="margin-bottom: 20px;">
+      <table class="expenses-table">
+        <thead>
+          <tr>
+            <th style="width: 45%; text-align: right;">البيان</th>
+            <th style="width: 25%; text-align: right;">التصنيف</th>
+            <th style="width: 20%; text-align: left;">المبلغ</th>
+            <th style="width: 10%; text-align: center;">إجراء</th>
+          </tr>
+        </thead>
+        <tbody id="input-expenses-tbody">
+          <!-- Rendered dynamically -->
+        </tbody>
+      </table>
+    </div>
+
+    <button type="button" class="btn-submit" id="btn-save-expenses-report" style="width: 100%; background-color: var(--green2); border-color: var(--green2);">
+      <span>💾 حفظ المصروفات ومطابقة الصندوق</span>
+    </button>
+  </div>
+
+  <!-- Expenses Daily Reports Ledger Section -->
+  <div class="cashier-card" id="expenses-history-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;" class="no-print">
+      <div class="card-label" style="font-size:16px; color:var(--lahmi2); font-weight:bold;">
+        <span>سجل حركات المصروفات والمشتريات اليومية</span>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap: wrap;">
+        <div>
+          <label class="form-label" style="font-size:12px; font-weight:normal; margin-bottom: 2px; display: block;">من تاريخ</label>
+          <input type="date" id="expenses-print-from" class="form-control" style="font-size:13px; padding:5px; height: auto;">
+        </div>
+        <div>
+          <label class="form-label" style="font-size:12px; font-weight:normal; margin-bottom: 2px; display: block;">إلى تاريخ</label>
+          <input type="date" id="expenses-print-to" class="form-control" style="font-size:13px; padding:5px; height: auto;">
+        </div>
+        <button class="btn-secondary" id="btn-print-expenses-statement" style="padding: 10px 15px; margin-top: 14px;">🖨️ طباعة كشف حساب المشتريات</button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <div id="expenses-ledger-table-container"></div>
+    </div>
+  </div>
+</div>

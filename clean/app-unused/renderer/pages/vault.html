@@ -1,0 +1,199 @@
+<div class="page-vault">
+  <div class="cashier-card no-print" style="margin-bottom: 20px;">
+    <div class="card-label" style="margin-bottom:15px; font-size:13px; color:var(--lahmi2)">🔐 إقفال الحركات وتقارير الصندوق المجمعة</div>
+    
+    <div class="form-grid" style="grid-template-columns: 1fr 1fr; margin-bottom:15px;">
+      <div class="form-group">
+        <label class="form-label">من تاريخ (البداية)</label>
+        <input type="date" id="vault-start-date" class="form-control">
+      </div>
+      <div class="form-group">
+        <label class="form-label">إلى تاريخ (النهاية)</label>
+        <input type="date" id="vault-end-date" class="form-control">
+      </div>
+    </div>
+    
+    <div style="display:flex; gap:10px; margin-bottom:20px;">
+      <button type="button" id="btn-fetch-vault" class="btn-submit" style="flex:1; margin-top:0;">
+        <span>🔍 عرض بيانات الفترة</span>
+      </button>
+      <button type="button" id="btn-close-vault" class="btn-submit" style="flex:1; margin-top:0; background:var(--kabd2); border-color:var(--kabd2);">
+        <span>🔒 إقفال حركة الفترة المختارة</span>
+      </button>
+      <button type="button" id="btn-unlock-vault" class="btn-submit" style="flex:1; margin-top:0; background:var(--red); border-color:var(--red); display:none;">
+        <span>🔓 إلغاء الإقفال (مدير)</span>
+      </button>
+    </div>
+
+    <div class="card-label" style="margin-bottom:10px; font-size:12px; color:var(--muted)">📊 ملخص تجميعي للفترة:</div>
+    
+    <!-- General Cash Payment Voucher Section -->
+    <div class="cashier-card no-print" style="margin-bottom: 20px; border: 1px solid var(--border-color); padding: 15px; border-radius: 8px;">
+      <div class="card-label" style="margin-bottom:15px; font-size:14px; color:var(--lahmi2); font-weight: bold;">📄 سند صرف نقدي عام (General Cash Payment Voucher)</div>
+      <input type="hidden" id="edit-voucher-id" value="">
+      <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom:15px; gap: 10px;">
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;">التاريخ</label>
+          <input type="date" id="voucher-date" class="form-control" style="padding: 8px;">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;">المبلغ (฿)</label>
+          <input type="number" id="voucher-amount" class="form-control" step="any" placeholder="0.00" style="padding: 8px;">
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;"><span data-i18n="payment_source">الحساب</span></label>
+          <select id="voucher-account" class="form-control account-dropdown" style="padding: 8px; height: 38px;"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;">البند / التصنيف</label>
+          <select id="voucher-category" class="form-control" style="padding: 8px; height: 38px;">
+            <option value="Zakat">زكاة (Zakat)</option>
+            <option value="Profit Distribution">توزيع أرباح (Profit Distribution)</option>
+            <option value="Partner Withdrawal">مسحوبات شركاء (Partner Withdrawal)</option>
+            <option value="General Expense">مصاريف عمومية (General Expense)</option>
+            <option value="Other">أخرى (Other)</option>
+          </select>
+        </div>
+        <div class="form-group" id="voucher-partner-group" style="display: none;">
+          <label class="form-label" style="font-size:12px;">اسم الشريك</label>
+          <select id="voucher-partner-name" class="form-control" style="padding: 8px;">
+            <option value="">-- اختر اسم الشريك --</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column: span 2;">
+          <label class="form-label" style="font-size:12px;">الوصف / البيان</label>
+          <input type="text" id="voucher-description" class="form-control" placeholder="أدخل تفاصيل الصرف" style="padding: 8px;">
+        </div>
+      </div>
+      <button type="button" id="btn-save-general-voucher" class="btn-submit" style="width: 100%; margin-top: 5px; padding: 10px;">
+        <span>💾 حفظ سند الصرف النقدي</span>
+      </button>
+    </div>
+
+    <!-- General Vouchers Table -->
+    <div class="cashier-card no-print" style="margin-bottom: 20px;">
+      <div class="card-label" style="margin-bottom:10px; font-size:13px; color:var(--lahmi2); display: flex; justify-content: space-between; align-items: center;">
+        <span>📋 سندات الصرف العام للفترة</span>
+        <button class="btn-primary" id="btn-open-partner-statement" style="padding: 4px 10px; font-size: 11px; margin: 0; background-color: var(--kabd);">📑 كشف حساب شريك</button>
+      </div>
+      <div class="table-container" style="max-height: 250px; overflow-y: auto;">
+        <table class="report-table professional-table">
+          <thead>
+            <tr>
+              <th class="table-header">رقم السند</th>
+              <th class="table-header">التاريخ</th>
+              <th class="table-header">البند</th>
+              <th class="table-header">الشريك</th>
+              <th class="table-header">المبلغ</th>
+              <th class="table-header">البيان</th>
+              <th class="table-header">بواسطة</th>
+              <th class="table-header no-print">خيارات</th>
+            </tr>
+          </thead>
+          <tbody id="general-vouchers-tbody">
+            <!-- Rendered dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Summary Details -->
+    <div class="cashier-row">
+      <span class="c-key">💵 إجمالي مبيعات نقد</span>
+      <span class="c-val" style="color:var(--lahmi2)" id="vault-sum-cash">฿0.00</span>
+    </div>
+    <div class="cashier-row">
+      <span class="c-key">🌐 إجمالي مبيعات أونلاين/شبكة</span>
+      <span class="c-val" style="color:var(--green2)" id="vault-sum-online">฿0.00</span>
+    </div>
+    <div class="cashier-row">
+      <span class="c-key">📉 إجمالي المصروفات التشغيلية</span>
+      <span class="c-val" style="color:var(--red)" id="vault-sum-expenses">฿0.00</span>
+    </div>
+    <div class="cashier-row">
+      <span class="c-key">إجمالي سلف الموظفين</span>
+      <span class="c-val" style="color:#d84315" id="vault-sum-employees">฿0.00</span>
+    </div>
+    <div class="cashier-row">
+      <span class="c-key">إجمالي مدفوعات الموردين</span>
+      <span class="c-val" style="color:#d84315" id="vault-sum-suppliers">฿0.00</span>
+    </div>
+    <div class="cashier-row">
+      <span class="c-key">📄 إجمالي سندات الصرف العام</span>
+      <span class="c-val" style="color:#d32f2f" id="vault-sum-vouchers">฿0.00</span>
+    </div>
+    <div class="cashier-row" style="border-bottom: 1px dashed var(--border); padding-bottom:10px; margin-bottom:10px;">
+      <span class="c-key">💰 صافي المتوفر الكلي (مبيعات - مصروفات وسندات صرف)</span>
+      <span class="c-val" style="color:var(--beige)" id="vault-sum-net">฿0.00</span>
+    </div>
+    
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button type="button" id="btn-print-summary" class="btn-submit" style="flex:1; margin-top:0; background:var(--gray-dark); border-color:var(--gray-dark);">
+        <span>🖨️ طباعة ملخص الفترة</span>
+      </button>
+      <button type="button" id="btn-print-detailed" class="btn-submit" style="flex:1; margin-top:0; background:var(--card2);">
+        <span>🖨️ طباعة تقرير تفصيلي (أيام ومصروفات)</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Partner Statement Modal -->
+  <div id="partner-statement-modal" class="modal">
+    <div class="modal-content" style="max-width: 400px; padding: 25px; border-radius: 12px;">
+      <div class="modal-header" style="border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
+        <h3 style="margin:0; color:#1e293b; font-size: 20px;">📑 كشف حساب شريك</h3>
+        <button type="button" id="btn-close-partner-statement" class="modal-close">✖</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group" style="margin-bottom: 15px;">
+          <label style="font-weight:bold; display:block; margin-bottom:5px;">اسم الشريك</label>
+          <div style="display:flex; gap:10px;">
+            <select id="partner-statement-name" class="form-control" style="padding:10px; font-size:15px; flex:1;">
+              <option value="">-- اختر الشريك --</option>
+            </select>
+            <button type="button" id="btn-add-partner-shortcut" class="btn-primary" style="padding: 10px; margin: 0; background-color: var(--kabd); white-space: nowrap;">+ إضافة شريك</button>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom: 15px;">
+          <label style="font-weight:bold; display:block; margin-bottom:5px;">من تاريخ</label>
+          <input type="date" id="partner-statement-start-date" class="form-control" style="padding:10px; font-size:15px; width:100%;">
+        </div>
+        <div class="form-group" style="margin-bottom: 25px;">
+          <label style="font-weight:bold; display:block; margin-bottom:5px;">إلى تاريخ</label>
+          <input type="date" id="partner-statement-end-date" class="form-control" style="padding:10px; font-size:15px; width:100%;">
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button type="button" id="btn-cancel-partner-statement" class="btn-secondary" style="padding: 10px 20px; font-size:15px;" data-i18n="btn_cancel">>إلغاء</button>
+          <button type="button" id="btn-print-partner-statement" class="btn-submit" style="padding: 10px 20px; font-size:15px; background-color: var(--kabd);">🖨️ طباعة الكشف</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Partner Modal -->
+  <div id="add-partner-modal" class="modal" style="z-index: 10001;">
+    <div class="modal-content" style="max-width: 400px; padding: 25px; border-radius: 12px;">
+      <div class="modal-header" style="border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px;">
+        <h3 style="margin:0; color:#1e293b; font-size: 20px;">إضافة شريك جديد</h3>
+        <button type="button" id="btn-close-add-partner" class="modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group" style="margin-bottom: 15px;">
+          <label style="font-weight:bold; display:block; margin-bottom:5px;">اسم الشريك</label>
+          <input type="text" id="new-partner-name" class="form-control" placeholder="أدخل اسم الشريك" style="padding:10px; font-size:15px; width:100%;">
+        </div>
+        <div class="form-group" style="margin-bottom: 25px;">
+          <label style="font-weight:bold; display:block; margin-bottom:5px;">رقم الجوال (اختياري)</label>
+          <input type="text" id="new-partner-phone" class="form-control" placeholder="أدخل رقم الجوال" style="padding:10px; font-size:15px; width:100%;">
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button type="button" id="btn-cancel-add-partner" class="btn-secondary" style="padding: 10px 20px; font-size:15px;">إلغاء</button>
+          <button type="button" id="btn-save-new-partner" class="btn-submit" style="padding: 10px 20px; font-size:15px; background-color: var(--kabd);">حفظ الشريك</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

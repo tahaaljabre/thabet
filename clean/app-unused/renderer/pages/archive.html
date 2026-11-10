@@ -1,0 +1,95 @@
+<div class="page-archive">
+  <div class="cashier-card">
+    <div class="card-label" style="margin-bottom:20px; font-size:16px; color:var(--lahmi2); font-weight:bold; display:flex; align-items:center; gap:10px;">
+      <span>📦 أرشيف النظام العام (General System Archive)</span>
+    </div>
+
+    <!-- Archive Tabs Header -->
+    <div style="display:flex; gap:10px; margin-bottom:20px; border-bottom:2px solid var(--border-color); padding-bottom:12px;" class="no-print">
+      <button type="button" class="tab-btn active" id="archive-tab-btn-emp" style="flex:1;">الموظفون المؤرشفون</button>
+      <button type="button" class="tab-btn" id="archive-tab-btn-sup" style="flex:1;">الموردون المؤرشفون</button>
+      <button type="button" class="tab-btn" id="archive-tab-btn-emptx" style="flex:1;">حركات الموظفين</button>
+      <button type="button" class="tab-btn" id="archive-tab-btn-suptx" style="flex:1;">حركات الموردين</button>
+    </div>
+
+    <!-- Panel: Archived Employees -->
+    <div id="archive-panel-emp" class="archive-panel active">
+      <div class="table-container" style="max-height: 500px; overflow-y: auto;">
+        <table class="report-table professional-table">
+          <thead>
+            <tr>
+              <th class="table-header">الاسم</th>
+              <th class="table-header">الهاتف</th>
+              <th class="table-header">الراتب الحالي</th>
+              <th class="table-header no-print">خيارات</th>
+            </tr>
+          </thead>
+          <tbody id="archive-emp-tbody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Panel: Archived Suppliers -->
+    <div id="archive-panel-sup" class="archive-panel" style="display:none;">
+      <div class="table-container" style="max-height: 500px; overflow-y: auto;">
+        <table class="report-table professional-table">
+          <thead>
+            <tr>
+              <th class="table-header">اسم المورد</th>
+              <th class="table-header">الهاتف</th>
+              <th class="table-header">العنوان</th>
+              <th class="table-header no-print">خيارات</th>
+            </tr>
+          </thead>
+          <tbody id="archive-sup-tbody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Panel: Archived Employee Transactions -->
+    <div id="archive-panel-emptx" class="archive-panel" style="display:none;">
+      <div class="table-container" style="max-height: 500px; overflow-y: auto;">
+        <table class="report-table professional-table">
+          <thead>
+            <tr>
+              <th class="table-header">الموظف</th>
+              <th class="table-header">التاريخ</th>
+              <th class="table-header">المبلغ</th>
+              <th class="table-header">ملاحظات</th>
+              <th class="table-header no-print">خيارات</th>
+            </tr>
+          </thead>
+          <tbody id="archive-emptx-tbody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Panel: Archived Supplier Transactions -->
+    <div id="archive-panel-suptx" class="archive-panel" style="display:none;">
+      <div class="table-container" style="max-height: 500px; overflow-y: auto;">
+        <table class="report-table professional-table">
+          <thead>
+            <tr>
+              <th class="table-header">المورد</th>
+              <th class="table-header">التاريخ</th>
+              <th class="table-header">نوع الحركة</th>
+              <th class="table-header">المبلغ</th>
+              <th class="table-header">ملاحظات</th>
+              <th class="table-header no-print">خيارات</th>
+            </tr>
+          </thead>
+          <tbody id="archive-suptx-tbody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>الملاحظات الملكية — ثابت</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#3d1818">
+  <link rel="icon" type="image/png" href="assets/icon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #220c0c;
+      --card: #3d1818;
+      --card2: #4a2020;
+      --gold: #d4a574;
+      --gold-light: #f5ebe1;
+      --text: #fdf6ec;
+      --muted: #b8947a;
+      --border: rgba(212, 165, 116, 0.28);
+      --green: #48bb78;
+      --red: #f56565;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'Cairo', 'Tajawal', sans-serif;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      padding-bottom: 28px;
+    }
+    header {
+      background: linear-gradient(180deg, #4a1c1c 0%, #2f1212 100%);
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .logo-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .app-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--gold);
+      background: #fff;
+      padding: 2px;
+      object-fit: contain;
+    }
+    .app-title {
+      font-size: 16px;
+      font-weight: 900;
+      color: var(--gold-light);
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(72, 187, 120, 0.15);
+      color: var(--green);
+      border: 1px solid rgba(72, 187, 120, 0.3);
+    }
+    .status-badge.saving {
+      background: rgba(236, 201, 75, 0.15);
+      color: #ecc94b;
+      border-color: rgba(236, 201, 75, 0.3);
+    }
+    .status-badge.offline {
+      background: rgba(245, 101, 101, 0.15);
+      color: var(--red);
+      border-color: rgba(245, 101, 101, 0.3);
+    }
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .main-wrap {
+      padding: 14px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .tabs-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .tab-pill {
+      padding: 6px 14px;
+      border-radius: 99px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .tab-pill.active {
+      background: rgba(212, 165, 116, 0.25);
+      color: #fff;
+      border-color: var(--gold);
+    }
+    .add-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px;
+      display: flex;
+      gap: 8px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    }
+    .add-input {
+      flex: 1;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 700;
+      outline: none;
+    }
+    .add-btn {
+      padding: 10px 16px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #d4a574 0%, #a67c4e 100%);
+      color: #1a0808;
+      font-weight: 900;
+      font-size: 13.5px;
+      border: none;
+      cursor: pointer;
+    }
+    .cards-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .note-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-right: 4px solid var(--gold);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+    }
+    .note-card[data-cat="tasks"] { border-right-color: #38bdf8; }
+    .note-card[data-cat="purchases"] { border-right-color: #fbbf24; }
+    .note-card.is-done {
+      opacity: 0.6;
+      border-right-color: var(--green);
+    }
+    .note-card.is-done .note-text {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+    .note-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .note-text {
+      flex: 1;
+      font-size: 14.5px;
+      font-weight: 700;
+      line-height: 1.55;
+      word-break: break-word;
+    }
+    .note-actions {
+      display: flex;
+      gap: 6px;
+    }
+    .act-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .note-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .cat-tag {
+      background: rgba(212, 165, 116, 0.16);
+      color: var(--gold-light);
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-size: 10.5px;
+      font-weight: 800;
+    }
+    .empty-msg {
+      text-align: center;
+      padding: 40px 18px;
+      color: var(--muted);
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+      font-size: 13.5px;
+      font-weight: 700;
+    }
+    .tips-box {
+      background: rgba(212, 165, 116, 0.08);
+      border: 1px dashed rgba(212, 165, 116, 0.3);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <div class="logo-box">
+        <img src="assets/icon.png" class="app-icon" alt="Thabit">
+        <div>
+          <div class="app-title">الملاحظات والتذكيرات</div>
+          <div style="font-size: 11px; color: var(--muted); font-weight: 600;">نظام هضرموت اليمن — سحابي مباشر</div>
+        </div>
+      </div>
+      <div class="status-badge" id="sync-status">
+        <span class="pulse-dot"></span>
+        <span id="sync-status-text">متصل</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-wrap">
+    <div class="tabs-bar">
+      <button type="button" class="tab-pill active" data-cat="all">الكل</button>
+      <button type="button" class="tab-pill" data-cat="tasks">مهام</button>
+      <button type="button" class="tab-pill" data-cat="purchases">تذكير مشتريات</button>
+      <button type="button" class="tab-pill" data-cat="general">عامة</button>
+    </div>
+
+    <div class="add-box">
+      <input type="text" id="mobile-new-note" class="add-input" placeholder="✍️ اكتب ملاحظة جديدة..." />
+      <button type="button" id="btn-add-note" class="add-btn">➕ إضافة</button>
+    </div>
+
+    <div id="mobile-cards-list" class="cards-list"></div>
+
+    <div class="tips-box">
+      💡 <strong>نصيحة:</strong> لحفظ الصفحة كأيقونة تطبيق في هاتفك، اضغط مشاركة ثم اختر <strong>"إضافة إلى الشاشة الرئيسية"</strong>.
+    </div>
+  </main>
+
+  <script>
+    const DB_BASE = 'https://thabit-2d72c-default-rtdb.firebaseio.com';
+    const urlParams = new URLSearchParams(window.location.search);
+    const pin = urlParams.get('pin') || 'THABIT_MAIN';
+    const notesKey = encodeURIComponent(pin);
+
+    const statusBadge = document.getElementById('sync-status');
+    const statusText = document.getElementById('sync-status-text');
+    const cardsContainer = document.getElementById('mobile-cards-list');
+    const newInput = document.getElementById('mobile-new-note');
+    const addBtn = document.getElementById('btn-add-note');
+
+    let notesList = [];
+    let activeTab = 'all';
+
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>'"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[c]));
+    }
+
+    function catLabel(cat) {
+      if (cat === 'tasks') return 'مهام';
+      if (cat === 'purchases') return 'تذكير مشتريات';
+      return 'عامة';
+    }
+
+    function formatNow() {
+      const d = new Date();
+      return d.toLocaleDateString('ar-SA') + ' ' + d.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function setStatus(type, msg) {
+      statusBadge.className = 'status-badge ' + (type || '');
+      statusText.textContent = msg;
+    }
+
+    function renderList() {
+      const filtered = notesList.filter(item => activeTab === 'all' || item.category === activeTab);
+      if (filtered.length === 0) {
+        cardsContainer.innerHTML = '<div class="empty-msg">لا توجد ملاحظات مسجلة في هذا التصنيف حالياً.</div>';
+        return;
+      }
+      cardsContainer.innerHTML = filtered.map(item => `
+        <div class="note-card ${item.done ? 'is-done' : ''}" data-cat="${esc(item.category || 'general')}">
+          <div class="note-top">
+            <div class="note-text">${esc(item.text)}</div>
+            <div class="note-actions">
+              <button type="button" class="act-btn done-btn" data-id="${esc(item.id)}">${item.done ? '↩️' : '✓'}</button>
+              <button type="button" class="act-btn del-btn" data-id="${esc(item.id)}">🗑️</button>
+            </div>
+          </div>
+          <div class="note-meta">
+            <span class="cat-tag">${esc(catLabel(item.category))}</span>
+            <span dir="ltr">${esc(item.createdAt || '')}</span>
+          </div>
+        </div>
+      `).join('');
+
+      cardsContainer.querySelectorAll('.done-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const item = notesList.find(n => String(n.id) === String(btn.dataset.id));
+          if (item) {
+            item.done = !item.done;
+            renderList();
+            saveCloudNotes();
+          }
+        });
+      });
+
+      cardsContainer.querySelectorAll('.del-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          notesList = notesList.filter(n => String(n.id) !== String(btn.dataset.id));
+          renderList();
+          saveCloudNotes();
+        });
+      });
+    }
+
+    async function loadCloudNotes() {
+      try {
+        const res = await fetch(`${DB_BASE}/notes/${notesKey}.json`);
+        if (!res.ok) throw new Error('Network error');
+        const data = await res.json();
+        if (data) {
+          let incoming = [];
+          if (Array.isArray(data.items)) {
+            incoming = data.items;
+          } else if (typeof data.text === 'string' && data.text.trim()) {
+            incoming = data.text.split('\n').map(s => s.trim()).filter(Boolean).map((line, i) => ({
+              id: 'm_' + i,
+              text: line,
+              category: 'general',
+              createdAt: formatNow(),
+              done: false
+            }));
+          }
+          if (JSON.stringify(incoming) !== JSON.stringify(notesList)) {
+            notesList = incoming;
+            renderList();
+          }
+        }
+        setStatus('', 'متصل لحظياً');
+      } catch (e) {
+        setStatus('offline', 'غير متصل');
+      }
+    }
+
+    async function saveCloudNotes() {
+      setStatus('saving', 'جاري الحفظ...');
+      try {
+        const payload = {
+          items: notesList,
+          text: notesList.map(n => n.text).join('\n'),
+          updatedAt: Date.now(),
+          source: 'mobile'
+        };
+        const res = await fetch(`${DB_BASE}/notes/${notesKey}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('Save error');
+        setStatus('', 'تمت المزامنة');
+      } catch (e) {
+        setStatus('offline', 'فشل الحفظ');
+      }
+    }
+
+    function addNote() {
+      const val = newInput.value.trim();
+      if (!val) return;
+      notesList.unshift({
+        id: 'note_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        text: val,
+        category: activeTab === 'all' ? 'general' : activeTab,
+        createdAt: formatNow(),
+        done: false
+      });
+      newInput.value = '';
+      renderList();
+      saveCloudNotes();
+    }
+
+    addBtn.addEventListener('click', addNote);
+    newInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addNote();
+      }
+    });
+
+    document.querySelectorAll('.tab-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeTab = btn.dataset.cat;
+        renderList();
+      });
+    });
+
+    renderList();
+    loadCloudNotes();
+    setInterval(loadCloudNotes, 3000);
+  </script>
+</body>
+</html>

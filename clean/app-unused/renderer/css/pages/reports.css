@@ -1,0 +1,73 @@
+.page-reports {
+  padding: 16px;
+  animation: fadeUp 0.4s ease both;
+}
+
+.page-reports .closing-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 25px;
+  margin-top: 15px;
+}
+
+.page-reports .closing-card {
+  background: var(--panel-bg, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.page-reports .closing-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+}
+
+.page-reports .closing-card-title {
+  font-size: 15px;
+  color: var(--muted, #64748b);
+  margin-bottom: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-reports .closing-card-value {
+  width: 100%;
+  background: transparent;
+  border: none;
+  text-align: center;
+  font-size: 26px;
+  font-weight: bold;
+  color: var(--text-color, #1e293b);
+  outline: none;
+  cursor: default;
+}
+
+/* Specific Colors */
+.page-reports .card-profit { border-top: 4px solid var(--green2, #10b981); }
+.page-reports .card-profit .closing-card-value { color: var(--green2, #10b981); font-size: 30px; }
+.page-reports .card-zakat { border-top: 4px solid var(--red, #ef4444); }
+.page-reports .card-zakat .closing-card-value { color: var(--red, #ef4444); }
+.page-reports .card-distrib { border-top: 4px solid var(--primary, #3b82f6); background: rgba(59, 130, 246, 0.05); }
+.page-reports .card-distrib .closing-card-value { color: var(--primary, #3b82f6); font-size: 32px; }
+
+/* Dark mode */
+body.dark-mode .page-reports .closing-card {
+  background: var(--card-bg, #1e293b);
+  border-color: var(--border-color, #334155);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+body.dark-mode .page-reports .closing-card-title { color: #cbd5e1; }
+body.dark-mode .page-reports .closing-card-value { color: #f8fafc; }
+body.dark-mode .page-reports .card-profit .closing-card-value { color: #34d399; }
+body.dark-mode .page-reports .card-zakat .closing-card-value { color: #f87171; }
+body.dark-mode .page-reports .card-distrib .closing-card-value { color: #60a5fa; }

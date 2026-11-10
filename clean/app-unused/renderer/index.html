@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>مطعم حضرموت اليمن - النظام الإداري</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<!-- استدعاء الأنماط الأساسية المجمعة -->
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<div class="header">
+  <div class="header-inner">
+    <div class="logo-box">
+      <img src="LOGO_PLACEHOLDER" alt="شعار مطعم حضرموت" id="header-logo-img">
+    </div>
+    <div class="header-info">
+      <h1 id="header-company-name"></h1>
+      <div class="eng" id="header-branch-name"></div>
+      <div class="status-badge" id="header-status-badge"><span class="status-dot"></span> نشط</div>
+    </div>
+    <div class="header-actions">
+      <!-- User info and Settings Dropdown -->
+      <div id="current-user-info" style="display: none; align-items: center; gap: 10px; margin-left: 10px; color: var(--text-color);">
+        <span id="current-username" style="font-weight: bold; background: var(--border-color); padding: 5px 10px; border-radius: 5px;"></span>
+        <div class="settings-wrapper" id="settings-wrapper-div" style="position: relative;">
+          <button id="btn-open-settings" class="settings-btn" style="background-color: #2c2c2c; border: 1px solid var(--border-color); color: var(--text-color); padding: 5px 15px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: 'Cairo', sans-serif;">
+            ⚙️ الإعدادات
+          </button>
+          <div id="settings-dropdown" class="settings-dropdown" style="position: absolute; top: calc(100% + 5px); right: 0; background: var(--card); min-width: 220px; z-index: 9999; border-radius: 8px; box-shadow: 0px 8px 16px rgba(0,0,0,0.5); border: 1px solid var(--border-color); overflow: hidden; padding: 5px 0;">
+            <a href="#" class="dropdown-item" data-action="settings" data-tab="company" data-role="manager" style="display:block; padding: 10px 15px; color: var(--text-color); text-decoration: none; border-bottom: 1px solid var(--border-color); font-size: 14px; text-align: right; font-weight: 600;">🏢 إعدادات الشركة</a>
+            <a href="#" class="dropdown-item" data-action="settings" data-tab="theme" style="display:block; padding: 10px 15px; color: var(--text-color); text-decoration: none; border-bottom: 1px solid var(--border-color); font-size: 14px; text-align: right; font-weight: 600;">🎨 المظهر واللغة</a>
+            <a href="#" class="dropdown-item" data-action="settings" data-tab="backup" data-role="manager" style="display:block; padding: 10px 15px; color: var(--text-color); text-decoration: none; border-bottom: 1px solid var(--border-color); font-size: 14px; text-align: right; font-weight: 600;">💾 الأمان والنسخ الاحتياطي</a>
+            <a href="#" class="dropdown-item" data-action="archive" data-role="manager" style="display:block; padding: 10px 15px; color: var(--text-color); text-decoration: none; border-bottom: 1px solid var(--border-color); font-size: 14px; text-align: right; font-weight: 600;">🗄️ سجل الحركات (Archive)</a>
+            <a href="#" class="dropdown-item" data-action="settings" data-tab="users" data-role="manager" style="display:block; padding: 10px 15px; color: var(--text-color); text-decoration: none; border-bottom: 1px solid var(--border-color); font-size: 14px; text-align: right; font-weight: 600;">👥 إدارة المستخدمين</a>
+            <a href="#" class="dropdown-item" data-action="settings" data-tab="cashiers" data-role="manager" style="display:block; padding: 10px 15px; color: var(--text-color); text-decoration: none; border-bottom: 1px solid var(--border-color); font-size: 14px; text-align: right; font-weight: 600;">🏧 إدارة الكاشيرات</a>
+            <a href="#" class="dropdown-item" data-action="settings" data-tab="partners" data-role="manager" style="display:block; padding: 10px 15px; color: var(--text-color); text-decoration: none; border-bottom: 1px solid var(--border-color); font-size: 14px; text-align: right; font-weight: 600;">🤝 إدارة الشركاء</a>
+            <a href="#" class="dropdown-item" data-action="settings" data-tab="clear" data-role="manager" style="display:block; padding: 10px 15px; color: var(--red); text-decoration: none; border-bottom: 1px solid var(--border-color); font-size: 14px; text-align: right; font-weight: 600;">⚠️ منطقة الخطر</a>
+            <a href="#" class="dropdown-item" data-action="logout" style="display:block; padding: 10px 15px; color: #f59e0b; text-decoration: none; font-size: 14px; text-align: right; font-weight: 600;">🚪 تسجيل الخروج</a>
+          </div>
+        </div>
+      </div>
+      <div class="date-badge" id="report-date-display">--</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <div class="tabs" id="main-tabs-nav" style="display: none;">
+    <button class="tab-btn" data-page="sales" data-permission="sales" data-i18n="menu_customers">المبيعات والصندوق</button>
+    <button class="tab-btn" data-page="expenses" data-permission="sales" data-i18n="menu_purchases">مشتريات</button>
+    <button class="tab-btn" data-page="suppliers" data-permission="suppliers" data-i18n="menu_suppliers">الموردين</button>
+    <button class="tab-btn" data-page="employees" data-permission="employees" data-i18n="menu_employees">الموظفين</button>
+    <button class="tab-btn" data-page="vault" data-permission="vault" data-i18n="menu_vault">حركة الصندوق</button>
+    <button class="tab-btn" data-page="banks" data-permission="vault" id="tab-btn-banks" style="color: var(--primary-color);" data-i18n="tab_btn_banks">🏛️ البنوك والحسابات</button>
+    <button class="tab-btn" data-page="dashboard" data-permission="reports" id="tab-btn-dashboard" style="color: var(--primary);" data-i18n="menu_dashboard">📊 الشاشة التفاعلية</button>
+    <button class="tab-btn" data-page="closing" data-role="manager" id="tab-btn-closing" style="color: var(--red);" data-i18n="tab_btn_closing">🔒 إغلاق السنة المالية</button>
+  </div>
+
+  <!-- Dynamic Content Container -->
+  <div id="content" class="tab-content" style="display: block;">
+      <!-- Router will mount active page here -->
+  </div>
+</div>
+
+<!-- ══ LOGIN MODAL ══ -->
+<div id="login-modal" class="modal no-print" style="display: flex; background: var(--bg-color); z-index: 9999;">
+  <div class="modal-content" style="max-width: 400px; margin: auto; text-align: center;">
+    <div class="modal-header">
+      <h3 id="login-title">🔒 تسجيل الدخول</h3>
+    </div>
+    <div class="modal-body" style="text-align: right;">
+      <p id="login-desc" style="font-size: 13px; margin-bottom: 15px;">الرجاء إدخال اسم المستخدم وكلمة المرور للوصول للنظام.</p>
+      <div class="form-group">
+        <label>اختر السنة المالية</label>
+        <select id="login-year-select" class="form-control" style="padding:8px; height:38px;"></select>
+      </div>
+      <div class="form-group">
+        <label>اسم المستخدم</label>
+        <input type="text" id="login-username" class="form-control" placeholder="اسم المستخدم">
+      </div>
+      <div class="form-group">
+        <label>كلمة المرور</label>
+        <input type="password" id="login-password" class="form-control" placeholder="كلمة المرور">
+      </div>
+    </div>
+    <div class="modal-footer" style="display: flex; justify-content: center;">
+      <button class="btn-submit" id="btn-login-action" style="width: 100%; margin-top: 0;">تسجيل الدخول</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;"></div>
+
+<!-- External Libraries -->
+<script src="../js/lib/chart.umd.js"></script>
+<script src="js/lib/purify.min.js"></script>
+
+<!-- Main Application Module -->
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
