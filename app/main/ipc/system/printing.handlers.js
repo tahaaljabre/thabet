@@ -55,8 +55,10 @@ function registerPrintingHandlers(mainWindow) {
     });
   
     ipcMain.handle('print-html-to-pdf', async (event, htmlString, pageSize) => {
+      let printWin = null;
+      let tempHtmlPath = null;
       try {
-        const printWin = new BrowserWindow({ show: false, webPreferences: { nodeIntegration: false } });
+        printWin = new BrowserWindow({ show: false, webPreferences: { nodeIntegration: false } });
         let fullHtml = '';
         if (htmlString.trim().startsWith('<html') || htmlString.trim().startsWith('<!DOCTYPE')) {
           fullHtml = htmlString;
@@ -79,7 +81,7 @@ function registerPrintingHandlers(mainWindow) {
           `;
         }
         // Write HTML to a temp file so backgrounds render correctly via file:// URL
-        const tempHtmlPath = path.join(app.getPath('temp'), 'report_tmp_' + Date.now() + '.html');
+        tempHtmlPath = path.join(app.getPath('temp'), 'report_tmp_' + Date.now() + '.html');
         fs.writeFileSync(tempHtmlPath, fullHtml, 'utf8');
         await printWin.loadFile(tempHtmlPath);
         
@@ -104,16 +106,20 @@ function registerPrintingHandlers(mainWindow) {
         const tempPath = path.join(app.getPath('temp'), 'report_' + Date.now() + '.pdf');
         fs.writeFileSync(tempPath, pdfData);
         shell.openPath(tempPath);
-        
-        // Clean up temp HTML file
-        try { fs.unlinkSync(tempHtmlPath); } catch(_) {}
-        
-        printWin.destroy();
+
         return { success: true, pdfGenerated: true };
       } catch (err) {
         console.error('Print HTML to PDF failed', err);
         dialog.showErrorBox('خطأ في الطباعة', 'حدث خطأ أثناء محاولة توليد أو فتح ملف الطباعة:\n' + err.message);
         return { success: false, error: err.message };
+      } finally {
+        // Always release the hidden window and remove the temp HTML, even on failure
+        if (tempHtmlPath) {
+          try { fs.unlinkSync(tempHtmlPath); } catch (_) {}
+        }
+        if (printWin && !printWin.isDestroyed()) {
+          printWin.destroy();
+        }
       }
     });
   

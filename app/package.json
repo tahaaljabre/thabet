@@ -21,8 +21,6 @@
   },
   "dependencies": {
     "@google-cloud/local-auth": "^3.0.1",
-    "chart.js": "^4.4.2",
-    "electron-store": "^8.2.0",
     "exceljs": "^4.4.0",
     "googleapis": "^173.0.0",
     "sqlite3": "^6.0.1"
@@ -46,7 +44,18 @@
       "**/*",
       "!**/credentials.json",
       "!**/google_oauth_credentials.json",
-      "!**/google_drive_token.json"
+      "!**/google_drive_token.json",
+      "!dist/**",
+      "!tests/**",
+      "!__mocks__/**",
+      "!scripts/**",
+      "!diagnostics/**",
+      "!mobile-dist/**",
+      "!test.js",
+      "!wipe-db.js",
+      "!package-lock.json",
+      "!**/*.md",
+      "!**/*.map"
     ],
     "win": {
       "target": "nsis"

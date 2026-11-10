@@ -35,7 +35,6 @@ contextBridge.exposeInMainWorld('api', {
   loginUser: (username, password) => ipcRenderer.invoke('login-user', username, password),
   getUsers: () => ipcRenderer.invoke('get-users'),
   deleteUser: (id) => ipcRenderer.invoke('delete-user', id),
-  emergencyResetUsers: () => ipcRenderer.invoke('emergency-reset-users'),
   clearAllData: () => ipcRenderer.invoke('clear-all-data'),
   getDashboardStats: (start, end, yearId, cashierName) => ipcRenderer.invoke('get-dashboard-stats', start, end, yearId, cashierName),
   getTrialBalance: (filters) => ipcRenderer.invoke('get-trial-balance', filters),

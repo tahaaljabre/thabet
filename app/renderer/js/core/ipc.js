@@ -59,7 +59,6 @@ export const updateUser = createIpcCall('updateUser');
 export const loginUser = createIpcCall('loginUser');
 export const getUsers = createIpcCall('getUsers');
 export const deleteUser = createIpcCall('deleteUser');
-export const emergencyResetUsers = createIpcCall('emergencyResetUsers');
 export const clearAllData = createIpcCall('clearAllData');
 
 // Dashboard channels

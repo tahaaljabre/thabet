@@ -145,9 +145,6 @@ async function logActivity(actionType, tableName, recordId, details, userName, y
 }
 
 function closeDatabase() {
-  if (typeof markDatabaseClosing === 'function') {
-    markDatabaseClosing();
-  }
   return new Promise((resolve) => {
     try {
       db.close(() => {
