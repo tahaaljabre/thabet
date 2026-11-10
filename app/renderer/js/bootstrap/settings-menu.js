@@ -81,7 +81,13 @@ export function setupSettingsMenu() {
         dropdown.classList.remove('active');
         const action = link.getAttribute('data-action');
         if (action === 'logout') {
-          window.location.reload(); // Simple logout by reloading app to login screen
+          try {
+            if (window.api && typeof window.api.logoutUser === 'function') {
+              await window.api.logoutUser();
+            }
+          } finally {
+            window.location.reload();
+          }
         } else if (action === 'archive') {
           try {
             if (typeof window.openArchiveModal !== 'function') throw new Error('Archive window is unavailable');

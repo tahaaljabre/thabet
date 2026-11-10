@@ -18,28 +18,34 @@ export async function initializeLogin() {
 
 async function checkInitialLogin() {
   try {
+    let standaloneSession = null;
     if (window.isStandaloneWindow && window.api && typeof window.api.getSessionContext === 'function') {
+      standaloneSession = await window.api.getSessionContext();
+    }
+
+    // A window without an authenticated session must show the login form
+    // instead of guessing a role for the current user.
+    if (standaloneSession && standaloneSession.user) {
       const loginModal = document.getElementById('login-modal');
       if (loginModal) loginModal.style.display = 'none';
 
-      const [years, sessionCtx, appSettings] = await Promise.all([
+      const [years, appSettings] = await Promise.all([
         ipc.getFinancialYears(),
-        window.api.getSessionContext(),
         ipc.getAppSettings()
       ]);
 
       financialYears = years || [];
       window.financialYears = financialYears;
 
-      const user = sessionCtx?.user || { username: 'Admin', role: 'manager', permissions: { sales: true, employees: true, suppliers: true, reports: true, vault: true } };
+      const user = standaloneSession.user;
       currentUser = user;
       window.currentUser = user;
       setState('currentUser', user);
 
-      activeYearId = sessionCtx?.yearId || 1;
+      activeYearId = standaloneSession.yearId || 1;
       window.currentYearId = activeYearId;
       setState('currentFiscalYear', activeYearId);
-      window.currentYearName = sessionCtx?.yearName || '';
+      window.currentYearName = standaloneSession.yearName || '';
 
       if (appSettings) {
         const compEl = document.getElementById('header-company-name');

@@ -147,6 +147,7 @@ contextBridge.exposeInMainWorld('api', {
   cascadeSectionWindows: () => ipcRenderer.invoke('cascade-section-windows'),
   getSessionContext: () => ipcRenderer.invoke('get-session-context'),
   setSessionContext: (context) => ipcRenderer.invoke('set-session-context', context),
+  logoutUser: () => ipcRenderer.invoke('logout-user'),
   getOpenSectionWindows: () => ipcRenderer.invoke('get-open-section-windows'),
   notifyDataChanged: (info) => ipcRenderer.invoke('notify-data-changed', info),
   onSectionWindowReopen: (callback) => {

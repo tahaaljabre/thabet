@@ -1,16 +1,26 @@
 const { app, ipcMain, BrowserWindow } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const {
+  getWindowSession,
+  updateWindowSession,
+  copyWindowSession,
+  clearWindowSession
+} = require('../../services/system/users/session');
 
 const sectionWindows = new Map();
 const visibleSections = new Set();
 let isQuitting = false;
 
-let currentSessionContext = {
-  user: null,
-  yearId: 1,
-  yearName: ''
-};
+function sessionContextFor(webContentsId) {
+  const session = getWindowSession(webContentsId);
+  if (!session) return { user: null, yearId: 1, yearName: '' };
+  return {
+    user: session.user || null,
+    yearId: session.yearId === null || session.yearId === undefined ? 1 : session.yearId,
+    yearName: session.yearName || ''
+  };
+}
 
 function getOpenSectionKeys() {
   const keys = [];
@@ -41,6 +51,9 @@ function destroyAllPooledWindows() {
   visibleSections.clear();
   for (const [, win] of sectionWindows.entries()) {
     if (win && !win.isDestroyed()) {
+      try {
+        clearWindowSession(win.webContents.id);
+      } catch (_) {}
       try { win.destroy(); } catch (_) {}
     }
   }
@@ -64,15 +77,26 @@ function registerWindowHandlers(mainWindow) {
   }
 
   ipcMain.handle('set-session-context', async (event, context = {}) => {
-    if (context.user !== undefined) currentSessionContext.user = context.user;
-    if (context.yearId !== undefined) currentSessionContext.yearId = context.yearId;
-    if (context.yearName !== undefined) currentSessionContext.yearName = context.yearName;
-    broadcastToAllWindows(mainWindow, 'session-context-updated', currentSessionContext);
+    const session = getWindowSession(event.sender.id);
+    // Identity always comes from the authenticated session; a renderer cannot
+    // promote itself or switch user through this channel.
+    if (!session || !session.role) {
+      return { success: false, error: 'غير مصرح - الرجاء تسجيل الدخول' };
+    }
+    const patch = {};
+    if (context.yearId !== undefined) patch.yearId = context.yearId;
+    if (context.yearName !== undefined) patch.yearName = context.yearName;
+    const updated = updateWindowSession(event.sender.id, patch) || session;
+    broadcastToAllWindows(mainWindow, 'session-context-updated', {
+      user: updated.user || null,
+      yearId: updated.yearId === null || updated.yearId === undefined ? 1 : updated.yearId,
+      yearName: updated.yearName || ''
+    });
     return { success: true };
   });
 
-  ipcMain.handle('get-session-context', async () => {
-    return currentSessionContext;
+  ipcMain.handle('get-session-context', async (event) => {
+    return sessionContextFor(event.sender.id);
   });
 
   ipcMain.handle('get-open-section-windows', async () => {
@@ -128,7 +152,6 @@ function registerWindowHandlers(mainWindow) {
       entityName = '',
       voucherNumber = '',
       title = 'مطعم حضرموت اليمن - النظام الإداري',
-      user,
       yearId,
       yearName
     } = options;
@@ -136,10 +159,6 @@ function registerWindowHandlers(mainWindow) {
     if (!section) {
       return { success: false, error: 'Missing section name' };
     }
-
-    if (user) currentSessionContext.user = user;
-    if (yearId) currentSessionContext.yearId = yearId;
-    if (yearName !== undefined) currentSessionContext.yearName = yearName;
 
     const existingWin = sectionWindows.get(section);
     if (existingWin && !existingWin.isDestroyed()) {
@@ -209,6 +228,17 @@ function registerWindowHandlers(mainWindow) {
 
     sectionWindows.set(section, childWin);
     visibleSections.add(section);
+
+    // The new window inherits the opener's authenticated session, so its IPC
+    // calls and its header context belong to the same user.
+    const childWebContentsId = childWin.webContents.id;
+    if (copyWindowSession(event.sender.id, childWebContentsId)) {
+      const patch = {};
+      if (yearId) patch.yearId = yearId;
+      if (yearName !== undefined) patch.yearName = yearName;
+      if (Object.keys(patch).length) updateWindowSession(childWebContentsId, patch);
+    }
+
     broadcastToAllWindows(mainWindow, 'open-sections-changed', getOpenSectionKeys());
 
     childWin.once('ready-to-show', () => {
@@ -229,6 +259,7 @@ function registerWindowHandlers(mainWindow) {
     });
 
     childWin.on('closed', () => {
+      clearWindowSession(childWebContentsId);
       visibleSections.delete(section);
       sectionWindows.delete(section);
       if (!isQuitting) {

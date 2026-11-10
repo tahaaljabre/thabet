@@ -142,15 +142,21 @@ async function performLogin() {
   }
 }
 
-function logoutUser() {
-  currentUser = null;
-  document.getElementById('login-modal').style.display = 'flex';
-  document.getElementById('login-username').value = '';
-  document.getElementById('login-password').value = '';
-  document.getElementById('current-user-info').style.display = 'none';
-  document.getElementById('settings-wrapper-div').style.display = 'none';
-  const dropdown = document.getElementById('settings-dropdown');
-  if(dropdown) dropdown.classList.remove('active');
+async function logoutUser() {
+  try {
+    if (window.api && typeof window.api.logoutUser === 'function') {
+      await window.api.logoutUser();
+    }
+  } finally {
+    currentUser = null;
+    document.getElementById('login-modal').style.display = 'flex';
+    document.getElementById('login-username').value = '';
+    document.getElementById('login-password').value = '';
+    document.getElementById('current-user-info').style.display = 'none';
+    document.getElementById('settings-wrapper-div').style.display = 'none';
+    const dropdown = document.getElementById('settings-dropdown');
+    if(dropdown) dropdown.classList.remove('active');
+  }
 }
 
 window.globalUsersMap = {};
