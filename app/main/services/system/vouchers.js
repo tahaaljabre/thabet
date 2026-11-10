@@ -1,6 +1,7 @@
 const { dbGet, dbAll, dbRun, isYearClosed, assertAccountingDateOpen, logActivity, getActiveUser } = require('../database');
 const { moveToTrash } = require('../trash.service');
 const accounting = require('../accounting.service');
+const { withTransaction } = require('../database/transaction');
 // General Vouchers
 async function getGeneralVouchers(yearId) {
   return await dbAll('SELECT v.*, b.is_cash_vault FROM CashGeneralVouchers v LEFT JOIN BankAccounts b ON v.account_id = b.id WHERE v.year_id = ? AND COALESCE(v.is_voided, 0) = 0 ORDER BY v.voucher_date DESC, v.id DESC', [yearId]);
@@ -14,8 +15,7 @@ async function saveGeneralVoucher(voucher) {
     if (previousVoucher) await assertAccountingDateOpen(previousVoucher.year_id, previousVoucher.voucher_date);
   }
 
-  await dbRun('BEGIN TRANSACTION');
-  try {
+  return withTransaction(async () => {
     let vault = await dbGet("SELECT id FROM BankAccounts WHERE is_cash_vault = 1 AND year_id = ? LIMIT 1", [yearId]);
     if (!vault) {
       const ins = await dbRun(
@@ -80,19 +80,14 @@ async function saveGeneralVoucher(voucher) {
         ]
       });
     }
-    await dbRun('COMMIT');
     return { success: true, id: txId };
-  } catch (err) {
-    await dbRun('ROLLBACK').catch(() => {});
-    throw err;
-  }
+  });
 }
 
 async function deleteGeneralVoucher(id) {
   const voucher = await dbGet('SELECT * FROM CashGeneralVouchers WHERE id = ?', [id]);
   if (voucher) await assertAccountingDateOpen(voucher.year_id, voucher.voucher_date);
-  await dbRun('BEGIN TRANSACTION');
-  try {
+  return withTransaction(async () => {
     if (voucher) {
       await accounting.reverseSourceEntries(
         voucher.year_id,
@@ -114,12 +109,8 @@ async function deleteGeneralVoucher(id) {
       [getActiveUser(), `إلغاء سند صرف ${id}`, id]
     );
     await logActivity('CANCEL', 'CashGeneralVouchers', id, `إلغاء سند صرف عام بقيمة ${voucher ? voucher.amount : 0} (${voucher ? voucher.category : ''})`, null, voucher ? voucher.year_id : 1);
-    await dbRun('COMMIT');
     return { success: true };
-  } catch (err) {
-    await dbRun('ROLLBACK').catch(() => {});
-    throw err;
-  }
+  });
 }
 
 async function updateGeneralVoucher(voucher) {

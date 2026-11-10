@@ -2,6 +2,7 @@ const { dbGet, dbAll, dbRun, isYearClosed, assertAccountingDateOpen, logActivity
 const { getNextVoucherNumber } = require('./voucher-sequence.service');
 const accounting = require('./accounting.service');
 const { moveToTrash } = require('./trash.service');
+const { withTransaction } = require('./database/transaction');
 
 async function getAllSuppliersStatement(startDate, endDate, yearId) {
   const suppliers = await dbAll("SELECT * FROM suppliers WHERE year_id = ? ORDER BY name ASC", [yearId]);
@@ -91,8 +92,7 @@ async function saveSupplierTransaction(tx) {
     if (previousTx) await assertAccountingDateOpen(previousTx.year_id, previousTx.tx_date);
   }
   
-  await dbRun('BEGIN TRANSACTION');
-  try {
+  return withTransaction(async () => {
     let vault = await dbGet("SELECT id FROM BankAccounts WHERE is_cash_vault = 1 AND year_id = ? LIMIT 1", [yearId]);
     if (!vault) {
       const ins = await dbRun(
@@ -166,20 +166,15 @@ async function saveSupplierTransaction(tx) {
         ]
       });
     }
-    await dbRun('COMMIT');
     return txId;
-  } catch (err) {
-    await dbRun('ROLLBACK').catch(() => {});
-    throw err;
-  }
+  });
 }
 
 async function deleteSupplierTransaction(id) {
   const tx = await dbGet('SELECT * FROM supplier_transactions WHERE id = ?', [id]);
   if (tx) await assertAccountingDateOpen(tx.year_id, tx.tx_date);
   
-  await dbRun('BEGIN TRANSACTION');
-  try {
+  return withTransaction(async () => {
     let details = `إلغاء حركة مورد بقيمة ${tx ? tx.amount : 0} (${tx ? tx.tx_type : ''})`;
     if (tx) {
       const supplier = await dbGet('SELECT name FROM suppliers WHERE id = ?', [tx.supplier_id]);
@@ -202,12 +197,8 @@ async function deleteSupplierTransaction(id) {
       [getActiveUser(), details, id]
     );
     await logActivity('CANCEL', 'supplier_transactions', id, details, null, tx ? tx.year_id : 1);
-    await dbRun('COMMIT');
     return true;
-  } catch (err) {
-    await dbRun('ROLLBACK').catch(() => {});
-    throw err;
-  }
+  });
 }
 
 

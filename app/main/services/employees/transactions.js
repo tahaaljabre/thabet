@@ -1,6 +1,7 @@
 const { dbGet, dbAll, dbRun, isYearClosed, assertAccountingDateOpen, logActivity, getActiveUser } = require('../database');
 const { moveToTrash } = require('../trash.service');
 const accounting = require('../accounting.service');
+const { withTransaction } = require('../database/transaction');
 
 async function getEmployeeTransactions(empId, yearId) {
   if (yearId !== undefined && yearId !== null) {
@@ -21,8 +22,7 @@ async function saveEmployeeTransaction(tx) {
     if (previousTx) await assertAccountingDateOpen(previousTx.year_id, previousTx.tx_date);
   }
   
-  await dbRun('BEGIN TRANSACTION');
-  try {
+  return withTransaction(async () => {
     let vault = await dbGet("SELECT id FROM BankAccounts WHERE is_cash_vault = 1 AND year_id = ? LIMIT 1", [yearId]);
     if (!vault) {
       const ins = await dbRun(
@@ -106,20 +106,15 @@ async function saveEmployeeTransaction(tx) {
         lines
       });
     }
-    await dbRun('COMMIT');
     return txId;
-  } catch (err) {
-    await dbRun('ROLLBACK').catch(() => {});
-    throw err;
-  }
+  });
 }
 
 async function deleteEmployeeTransaction(id) {
   const tx = await dbGet('SELECT * FROM employee_transactions WHERE id = ?', [id]);
   if (tx) await assertAccountingDateOpen(tx.year_id, tx.tx_date);
   
-  await dbRun('BEGIN TRANSACTION');
-  try {
+  return withTransaction(async () => {
     let details = `إلغاء حركة موظف بقيمة ${tx ? tx.amount : 0}`;
     if (tx) {
       const empRow = await dbGet('SELECT name FROM employees WHERE id = ?', [tx.employee_id]);
@@ -142,12 +137,8 @@ async function deleteEmployeeTransaction(id) {
       [getActiveUser(), details, id]
     );
     await logActivity('CANCEL', 'employee_transactions', id, details, null, tx ? tx.year_id : 1);
-    await dbRun('COMMIT');
     return true;
-  } catch (err) {
-    await dbRun('ROLLBACK').catch(() => {});
-    throw err;
-  }
+  });
 }
 
 module.exports = { getEmployeeTransactions, getEmployeeTransactionById, saveEmployeeTransaction, deleteEmployeeTransaction };

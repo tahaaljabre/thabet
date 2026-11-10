@@ -1,6 +1,7 @@
 const { dbGet, dbAll, dbRun, isYearClosed, assertAccountingDateOpen, logActivity, getActiveUser } = require('./database');
 const accounting = require('./accounting.service');
 const { moveToTrash } = require('./trash.service');
+const { withTransaction } = require('./database/transaction');
 
 function bankAccountSummary(acc) {
   if (!acc) return '—';
@@ -181,8 +182,7 @@ async function saveBankSalesMappings(mappings, requestedYearId) {
     }
   }
   const previousMappings = await dbAll('SELECT channel_name, bank_account_id FROM BankSalesMapping WHERE year_id = ? ORDER BY channel_name', [yearId]);
-  await dbRun('BEGIN TRANSACTION');
-  try {
+  await withTransaction(async () => {
     await dbRun('DELETE FROM BankSalesMapping WHERE year_id = ?', [yearId]);
     if (mappings.length > 0) {
       for (const m of mappings) {
@@ -192,11 +192,7 @@ async function saveBankSalesMappings(mappings, requestedYearId) {
         );
       }
     }
-    await dbRun('COMMIT');
-  } catch (error) {
-    await dbRun('ROLLBACK').catch(() => {});
-    throw error;
-  }
+  });
   const summarizeMappings = items => items.map(item => `${item.channel_name}→${item.bank_account_id}`).join(', ') || 'بدون ربط';
   await logActivity('UPDATE', 'BankSalesMapping', null,
     `تعديل ربط قنوات البيع بالبنوك | قبل: ${summarizeMappings(previousMappings)} | بعد: ${summarizeMappings(mappings)}`, null, yearId);

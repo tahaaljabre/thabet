@@ -1,6 +1,7 @@
 const { dbAll, dbRun } = require('./database');
 const { dbGet } = require('./database');
 const { getLocalDateString } = require('../utils/date');
+const { withTransaction } = require('./database/transaction');
 
 async function archiveItem({ type, id, state }) {
   const isArchived = state ? 1 : 0;
@@ -10,8 +11,7 @@ async function archiveItem({ type, id, state }) {
     if (Number(employee.is_archived || 0) === isArchived) return { changes: 0 };
 
     const today = getLocalDateString();
-    await dbRun('BEGIN TRANSACTION');
-    try {
+    await withTransaction(async () => {
       if (isArchived) {
         await dbRun('UPDATE employees SET is_archived=1, archived_at=? WHERE id=?', [today, id]);
         await dbRun(`
@@ -30,12 +30,8 @@ async function archiveItem({ type, id, state }) {
           )
         `, [today, id]);
       }
-      await dbRun('COMMIT');
-      return { changes: 1 };
-    } catch (error) {
-      await dbRun('ROLLBACK').catch(() => {});
-      throw error;
-    }
+    });
+    return { changes: 1 };
   } else if (type === 'supplier') {
     return await dbRun("UPDATE suppliers SET is_archived=? WHERE id=?", [isArchived, id]);
   } else if (type === 'employee_tx') {

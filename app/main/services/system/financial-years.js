@@ -2,6 +2,7 @@ const { dbGet, dbAll, dbRun, logActivity } = require('../database');
 const { getLocalDateString } = require('../../utils/date');
 const { getBankAccountsWithBalance } = require('../banks.service');
 const { getAccruedSalary } = require('../employees.service');
+const { withTransaction } = require('../database/transaction');
 // Financial Years
 async function getFinancialYears() {
   return await dbAll('SELECT * FROM FinancialYears ORDER BY YearName ASC');
@@ -46,8 +47,7 @@ async function saveClosingPartners(yearId, partners) {
     throw new Error('ERR_PARTNER_PERCENTAGE_TOTAL');
   }
 
-  await dbRun('BEGIN TRANSACTION');
-  try {
+  await withTransaction(async () => {
     await dbRun('DELETE FROM ClosingPartners WHERE year_id = ?', [yearId]);
     for (const partner of normalized) {
       await dbRun(
@@ -55,11 +55,7 @@ async function saveClosingPartners(yearId, partners) {
         [yearId, partner.name, partner.percentage]
       );
     }
-    await dbRun('COMMIT');
-  } catch (error) {
-    await dbRun('ROLLBACK').catch(() => {});
-    throw error;
-  }
+  });
   return { success: true };
 }
 
@@ -85,8 +81,7 @@ async function closeFinancialYear(yearId, newYearName) {
   if (Number(periodSummary?.total_periods) !== 12 || Number(periodSummary?.closed_periods) !== 12) {
     throw new Error('FIN_ALL_MONTHS_MUST_BE_CLOSED');
   }
-  await dbRun('BEGIN TRANSACTION');
-  try {
+  return withTransaction(async () => {
     await dbRun('UPDATE FinancialYears SET IsClosed = 1 WHERE YearID = ?', [yearId]);
     const res = await dbRun('INSERT INTO FinancialYears (YearName, IsClosed) VALUES (?, 0)', [newYearName]);
     const newYearId = res.lastID;
@@ -179,12 +174,8 @@ async function closeFinancialYear(yearId, newYearName) {
     }
     
     await logActivity('CLOSE_YEAR', 'FinancialYears', yearId, `إغلاق السنة المالية وترحيل الحسابات إلى السنة الجديدة: ${newYearName}`, null, yearId);
-    await dbRun('COMMIT');
     return { success: true, newYearId };
-  } catch (err) {
-    await dbRun('ROLLBACK').catch(() => {});
-    throw err;
-  }
+  });
 }
 module.exports = {
   getFinancialYears,

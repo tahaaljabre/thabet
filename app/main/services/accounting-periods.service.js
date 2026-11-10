@@ -1,5 +1,6 @@
 const { dbAll, dbGet, dbRun, isYearClosed, getActiveUser, logActivity } = require('./database');
 const integrityService = require('./financial-integrity.service');
+const { withTransaction } = require('./database/transaction');
 
 async function ensurePeriods(yearId) {
   if (!yearId) throw new Error('FIN_YEAR_REQUIRED');
@@ -105,8 +106,7 @@ async function closeAccountingPeriod(yearId, month, note = '') {
   );
   if (totals.debit_minor !== totals.credit_minor) throw new Error('FIN_PERIOD_TRIAL_BALANCE_UNBALANCED');
 
-  await dbRun('BEGIN IMMEDIATE');
-  try {
+  return withTransaction(async () => {
     const result = await dbRun(
       `UPDATE AccountingPeriods
        SET status = 'closed', closed_at = CURRENT_TIMESTAMP, closed_by = ?,
@@ -126,14 +126,10 @@ async function closeAccountingPeriod(yearId, month, note = '') {
        VALUES (?, 'close', ?, ?, ?, ?)`,
       [period.id, getActiveUser(), String(note || ''), totals.debit_minor, totals.credit_minor]
     );
-    await dbRun('COMMIT');
     await logActivity('CLOSE_PERIOD', 'AccountingPeriods', period.id,
       `إقفال الفترة الشهرية ${periodMonth}`, null, yearId);
     return period;
-  } catch (error) {
-    await dbRun('ROLLBACK').catch(() => {});
-    throw error;
-  }
+  }, { immediate: true });
 }
 
 async function reopenAccountingPeriod(yearId, month, reason) {
@@ -155,8 +151,7 @@ async function reopenAccountingPeriod(yearId, month, reason) {
     throw error;
   }
 
-  await dbRun('BEGIN IMMEDIATE');
-  try {
+  return withTransaction(async () => {
     const result = await dbRun(
       `UPDATE AccountingPeriods
        SET status = 'open', reopened_at = CURRENT_TIMESTAMP, reopened_by = ?,
@@ -174,14 +169,10 @@ async function reopenAccountingPeriod(yearId, month, reason) {
        VALUES (?, 'reopen', ?, ?)`,
       [period.id, getActiveUser(), normalizedReason]
     );
-    await dbRun('COMMIT');
     await logActivity('REOPEN_PERIOD', 'AccountingPeriods', period.id,
       `إعادة فتح الفترة الشهرية ${periodMonth}: ${normalizedReason}`, null, yearId);
     return period;
-  } catch (error) {
-    await dbRun('ROLLBACK').catch(() => {});
-    throw error;
-  }
+  }, { immediate: true });
 }
 
 module.exports = {

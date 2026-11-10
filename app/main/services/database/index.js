@@ -1,5 +1,6 @@
 const { db } = require('./connection');
 const { initializeSchema } = require('./schema');
+const { runExclusive, isInsideTransaction } = require('./transaction');
 
 initializeSchema(db);
 
@@ -33,12 +34,17 @@ const dbAll = (query, params = []) => {
 };
 
 const dbRun = (query, params = []) => {
-  return new Promise((resolve, reject) => {
+  const run = () => new Promise((resolve, reject) => {
     db.run(query, params, function (err) {
       if (err) return reject(err);
       resolve(this);
     });
   });
+  // Standalone writes are queued so they cannot join another operation's open
+  // transaction and get rolled back with it. Writes inside withTransaction run
+  // directly because they already own the queue.
+  if (isInsideTransaction()) return run();
+  return runExclusive(run);
 };
 
 async function waitForDatabaseReady({ timeoutMs = 10000 } = {}) {

@@ -2,7 +2,7 @@ const { dbAll, dbRun, dbGet, isYearClosed, assertAccountingDateOpen, logActivity
 const { getNextVoucherNumber } = require('./voucher-sequence.service');
 const accounting = require('./accounting.service');
 const { moveToTrash } = require('./trash.service');
-const { runFinancialOperationExclusive } = require('./financial-operation-lock.service');
+const { withTransaction } = require('./database/transaction');
 
 const expenseSourceKey = reportDate => String(reportDate);
 
@@ -26,8 +26,7 @@ async function saveExpensesReport(payload) {
   if (!Array.isArray(purchases)) throw new Error('قائمة المصروفات غير صالحة');
   await assertAccountingDateOpen(yearId, reportDate);
 
-  await dbRun('BEGIN TRANSACTION');
-  try {
+  return withTransaction(async () => {
     const existing = await dbGet(
       'SELECT voucher_number FROM expenses WHERE report_date = ? AND year_id = ? AND COALESCE(is_voided, 0) = 0 AND voucher_number IS NOT NULL LIMIT 1',
       [reportDate, yearId]
@@ -134,12 +133,8 @@ async function saveExpensesReport(payload) {
       null,
       yearId
     );
-    await dbRun('COMMIT');
     return { success: true, expenseVoucherNumber: voucherNumber, savedPurchasesCount: purchases.length };
-  } catch (error) {
-    await dbRun('ROLLBACK').catch(() => {});
-    throw error;
-  }
+  });
 }
 
 async function getExpensesLedger(startDate, endDate, yearId) {
@@ -161,7 +156,7 @@ async function getExpensesLedger(startDate, endDate, yearId) {
 }
 
 async function deleteDailyExpenses(reportDate, yearId) {
-  return runFinancialOperationExclusive(async () => {
+  return withTransaction(async () => {
   if (!yearId) throw new Error('السنة المالية مطلوبة لحذف المصروفات.');
   const exp = await dbGet('SELECT year_id FROM expenses WHERE report_date = ? AND year_id = ? AND COALESCE(is_voided, 0) = 0 LIMIT 1', [reportDate, yearId]);
   const summary = await dbGet(`SELECT COUNT(*) AS item_count,
@@ -178,8 +173,6 @@ async function deleteDailyExpenses(reportDate, yearId) {
   }
   await assertAccountingDateOpen(yearId, reportDate);
 
-  await dbRun('BEGIN IMMEDIATE');
-  try {
     await accounting.reverseSourceEntries(
       yearId,
       'expenses',
@@ -208,16 +201,11 @@ async function deleteDailyExpenses(reportDate, yearId) {
         rowsToTrash.slice(1).map(row => ({ table: 'expenses', row }))
       );
     }
-    await dbRun('COMMIT');
-  } catch (error) {
-    await dbRun('ROLLBACK').catch(() => {});
-    throw error;
-  }
   await logActivity('CANCEL', 'expenses', null,
     `إلغاء مصروفات يوم ${reportDate} | عدد البنود: ${summary ? summary.item_count : 0} | الإجمالي: ${summary ? summary.total_amount : 0}`,
     null, yearId);
   return { success: true };
-  });
+  }, { immediate: true });
 }
 
 async function getExpensesByDateRange(startDate, endDate, yearId) {

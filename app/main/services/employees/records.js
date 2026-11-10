@@ -1,6 +1,7 @@
 const { dbGet, dbAll, dbRun, isYearClosed, logActivity } = require('../database');
 const { moveToTrash } = require('../trash.service');
 const { getLocalDateString } = require('../../utils/date');
+const { withTransaction } = require('../database/transaction');
 
 async function getEmployees(yearId) {
   return await dbAll(`
@@ -50,17 +51,12 @@ async function deleteEmployeeCategory(id) {
   const categoryId = Number(id);
   const existing = await dbGet('SELECT * FROM employee_categories WHERE id = ?', [categoryId]);
   if (!existing) throw new Error('الفئة غير موجودة');
-  await dbRun('BEGIN TRANSACTION');
-  try {
+  return withTransaction(async () => {
     await dbRun('UPDATE employees SET category_id = NULL WHERE category_id = ?', [categoryId]);
     const res = await dbRun('DELETE FROM employee_categories WHERE id = ?', [categoryId]);
     await logActivity('DELETE', 'employee_categories', categoryId, `حذف فئة موظفين: ${existing.name}`, null, 1);
-    await dbRun('COMMIT');
     return { success: true, changes: res.changes };
-  } catch (err) {
-    await dbRun('ROLLBACK').catch(() => {});
-    throw err;
-  }
+  });
 }
 
 async function getEmployeePhoto(empId) {
@@ -85,19 +81,14 @@ async function saveEmployee(emp) {
     const nextCategoryId = rawCategoryId !== undefined ? normalizedCategoryId : (previous.category_id ?? null);
     const latestSalary = await dbGet('SELECT salary FROM employee_salary_history WHERE employee_id=? ORDER BY effective_date DESC, id DESC LIMIT 1', [emp.id]);
     const previousSalary = latestSalary ? Number(latestSalary.salary) : Number(previous.salary || 0);
-    await dbRun('BEGIN TRANSACTION');
-    try {
+    return withTransaction(async () => {
       await dbRun("UPDATE employees SET name=?, phone=?, salary=?, photo=?, monthly_accrual_start_date=?, category_id=? WHERE id=?", [String(emp.name).trim(), emp.phone, salary, emp.photo, emp.monthly_accrual_start_date, nextCategoryId, emp.id]);
       if (salary !== previousSalary) {
         await dbRun("INSERT INTO employee_salary_history (employee_id, salary, effective_date) VALUES (?, ?, ?)", [emp.id, salary, getLocalDateString()]);
       }
       await logActivity('UPDATE', 'employees', emp.id, `تعديل الموظف: ${emp.name} | الراتب: ${previousSalary} ← ${salary}`, null, yearId);
-      await dbRun('COMMIT');
       return emp.id;
-    } catch (err) {
-      await dbRun('ROLLBACK').catch(() => {});
-      throw err;
-    }
+    });
   } else {
     let today = getLocalDateString();
     let startDateStr = emp.monthly_accrual_start_date || today;

@@ -3,23 +3,21 @@ const { getNextVoucherNumber } = require('../voucher-sequence.service');
 const accounting = require('../accounting.service');
 const { normalizeVatSettings, splitInclusiveVat } = require('../vat.service');
 const { moveToTrash } = require('../trash.service');
-const { runFinancialOperationExclusive } = require('../financial-operation-lock.service');
+const { withTransaction } = require('../database/transaction');
 
 function salesSourceKey(reportDate, cashierName) {
   return `${reportDate}|${cashierName}`;
 }
 
 async function deleteDailyReport(reportDate, cashierName, yearId) {
-  return runFinancialOperationExclusive(async () => {
-  await assertAccountingDateOpen(yearId, reportDate);
-  const activeReport = await dbGet(
-    `SELECT * FROM daily_reports WHERE report_date=? AND cashier_name=?
+  return withTransaction(async () => {
+    await assertAccountingDateOpen(yearId, reportDate);
+    const activeReport = await dbGet(
+      `SELECT * FROM daily_reports WHERE report_date=? AND cashier_name=?
      AND year_id=? AND COALESCE(is_voided,0)=0`,
-    [reportDate, cashierName, yearId]
-  );
-  if (!activeReport) return { success: true, alreadyDeleted: true };
-  await dbRun('BEGIN IMMEDIATE');
-  try {
+      [reportDate, cashierName, yearId]
+    );
+    if (!activeReport) return { success: true, alreadyDeleted: true };
     await accounting.reverseSourceEntries(
       yearId,
       'sales',
@@ -57,13 +55,8 @@ async function deleteDailyReport(reportDate, cashierName, yearId) {
       [getActiveUser(), `إلغاء عمولة مرتبطة بمبيعات ${reportDate}`, reportDate, yearId, cashierName]
     );
     await logActivity('CANCEL', 'daily_reports', null, `إلغاء تقرير مبيعات يوم: ${reportDate} للكاشير ${cashierName}`, null, yearId);
-    await dbRun('COMMIT');
     return { success: true };
-  } catch (error) {
-    await dbRun('ROLLBACK').catch(() => {});
-    throw error;
-  }
-  });
+  }, { immediate: true });
 }
 
 async function saveReportState(state) {
@@ -72,8 +65,7 @@ async function saveReportState(state) {
   const cashierName = state.cashierName || 'الدور الأول';
   const cashierUser = state.cashierUser || 'الموظف المسؤول';
 
-  await dbRun('BEGIN TRANSACTION');
-  try {
+  return withTransaction(async () => {
     const existingReport = await dbGet('SELECT * FROM daily_reports WHERE report_date = ? AND cashier_name = ? AND year_id = ?', [state.reportDate, cashierName, yearId]);
     
     let voucherNum = null;
@@ -236,15 +228,11 @@ async function saveReportState(state) {
     }
 
     await logActivity('UPDATE', 'daily_reports', null, `حفظ تقرير مبيعات يوم: ${state.reportDate} للكاشير ${cashierName} (نقد: ${salesData.cash || 0})`, null, yearId);
-    await dbRun('COMMIT');
     return {
       success: true,
       voucherNumber: voucherNum
     };
-  } catch (error) {
-    await dbRun('ROLLBACK').catch(() => {});
-    throw error;
-  }
+  });
 }
 
 module.exports = { deleteDailyReport, saveReportState };

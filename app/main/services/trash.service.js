@@ -1,4 +1,5 @@
 const { dbGet, dbAll, dbRun, getActiveUser, logActivity, isYearClosed } = require('./database');
+const { withTransaction } = require('./database/transaction');
 
 const ALLOWED_TABLES = new Set([
   'BankAccounts', 'BankTransactions', 'BankSalesMapping',
@@ -78,16 +79,15 @@ async function restoreTrashItem(id) {
   if (payload.primary.table === 'daily_reports' || payload.primary.table === 'expenses') {
     return restoreFinancialVoucher(item, payload);
   }
-  await dbRun('BEGIN TRANSACTION');
   try {
-    await insertRow(payload.primary.table, payload.primary.row);
-    for (const related of payload.related || []) await insertRow(related.table, related.row);
-    await dbRun('DELETE FROM TrashItems WHERE id = ?', [id]);
-    await logActivity('RESTORE', payload.primary.table, item.record_id, `استعادة من سلة المحذوفات: ${item.display_name}`, null, item.year_id);
-    await dbRun('COMMIT');
-    return { success: true };
+    return await withTransaction(async () => {
+      await insertRow(payload.primary.table, payload.primary.row);
+      for (const related of payload.related || []) await insertRow(related.table, related.row);
+      await dbRun('DELETE FROM TrashItems WHERE id = ?', [id]);
+      await logActivity('RESTORE', payload.primary.table, item.record_id, `استعادة من سلة المحذوفات: ${item.display_name}`, null, item.year_id);
+      return { success: true };
+    });
   } catch (error) {
-    await dbRun('ROLLBACK').catch(() => {});
     if (/UNIQUE|PRIMARY KEY/i.test(error.message)) throw new Error('تعذر الاستعادة لأن رقم السجل مستخدم حاليًا');
     throw error;
   }
