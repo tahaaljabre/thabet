@@ -26,8 +26,8 @@
     "sqlite3": "^6.0.1"
   },
   "devDependencies": {
-    "electron": "^30.0.0",
-    "electron-builder": "^24.13.3",
+    "electron": "^42.11.16",
+    "electron-builder": "^26.18.0",
     "jest": "^30.4.2"
   },
   "build": {
