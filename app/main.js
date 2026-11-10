@@ -19,6 +19,7 @@ const { startMobileSyncServer } = require('./main/services/mobile-sync-server.se
 
 // Import database and utilities for startup migrations
 const { dbGet, dbAll, dbRun, closeDatabase } = require('./main/services/database');
+const { withTransaction } = require('./main/services/database/transaction');
 const { getLocalDateString } = require('./main/utils/date');
 
 let mainWindow;
@@ -80,19 +81,18 @@ app.whenReady().then(() => {
         for (const exp of oldExps) {
           const vault = await dbGet("SELECT id FROM BankAccounts WHERE is_cash_vault = 1 AND year_id = ? LIMIT 1", [exp.year_id || 1]);
           if (vault) {
-            await dbRun("BEGIN TRANSACTION");
-            await dbRun("UPDATE expenses SET account_id = ? WHERE id = ?", [vault.id, exp.id]);
-            await dbRun(
-              "INSERT INTO BankTransactions (tx_date, tx_type, from_account_id, amount, description, created_by, year_id, reference_type, reference_id) VALUES (?, 'Withdrawal', ?, ?, ?, ?, ?, 'expense', ?)",
-              [exp.report_date, vault.id, exp.amount, `مصروف: ${exp.name}`, exp.cashier_name || 'النظام', exp.year_id || 1, exp.id]
-            );
-            await dbRun("COMMIT");
+            await withTransaction(async () => {
+              await dbRun("UPDATE expenses SET account_id = ? WHERE id = ?", [vault.id, exp.id]);
+              await dbRun(
+                "INSERT INTO BankTransactions (tx_date, tx_type, from_account_id, amount, description, created_by, year_id, reference_type, reference_id) VALUES (?, 'Withdrawal', ?, ?, ?, ?, ?, 'expense', ?)",
+                [exp.report_date, vault.id, exp.amount, `مصروف: ${exp.name}`, exp.cashier_name || 'النظام', exp.year_id || 1, exp.id]
+              );
+            });
           }
         }
         console.log("Migrated " + oldExps.length + " old expenses to Cash Vault.");
       }
     } catch (err) {
-      await dbRun("ROLLBACK").catch(() => {});
       console.error("Migration failed:", err);
     }
   }, 5000);

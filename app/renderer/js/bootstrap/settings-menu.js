@@ -1,4 +1,5 @@
 import { initBackgroundUpdateCheck } from '../pages/settings/updater.js';
+import { sanitizeTemplate } from '../core/dom.js';
 
 export async function openSettingsModal(tabId = 'company') {
   try {
@@ -16,7 +17,7 @@ export async function openSettingsModal(tabId = 'company') {
       modalContainer.style.display = 'flex';
       modalContainer.style.zIndex = '99999';
     }
-    modalContainer.innerHTML = `
+    modalContainer.innerHTML = sanitizeTemplate(`
       <div class="modal-content settings-modal-shell" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
         <div class="settings-modal-header">
           <div class="settings-modal-heading">
@@ -32,7 +33,7 @@ export async function openSettingsModal(tabId = 'company') {
           ${module.getTemplate()}
         </div>
       </div>
-    `;
+    `);
     if (module.init) await module.init({ tab: tabId, isModal: true });
     if (typeof window.applyTranslations === 'function') window.applyTranslations(modalContainer);
   } catch (error) {

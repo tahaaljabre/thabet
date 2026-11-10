@@ -4,6 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://thabit-2d72c-default-rtdb.firebaseio.com; frame-src 'self' data: blob:; object-src 'none'; base-uri 'none'; form-action 'self'">
   <title>مطعم حضرموت اليمن - التقرير اليومي</title>
   <link
     href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap"
@@ -577,6 +579,7 @@
     </div>
   </div>
 
+  <script src="renderer/js/lib/purify.min.js"></script>
   <script src="js/lib/chart.umd.js"></script>
   <!-- Dashboard Page Modules -->
   <script src="renderer/js/pages/dashboard/charts.js"></script>

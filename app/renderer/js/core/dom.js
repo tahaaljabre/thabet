@@ -2,11 +2,41 @@
  * Safe DOM helpers.
  */
 
+/** Attributes the page templates rely on; DOMPurify strips event handlers by default. */
+const TEMPLATE_HANDLER_ATTRS = ['onclick', 'onchange', 'oninput', 'onkeydown'];
+
+function purify() {
+  return typeof window !== 'undefined' && window.DOMPurify ? window.DOMPurify : null;
+}
+
 export function sanitizeHTML(html) {
-  if (typeof DOMPurify !== 'undefined') {
-    return DOMPurify.sanitize(html);
-  }
-  return html; // Fallback if not loaded
+  const domPurify = purify();
+  if (!domPurify) return String(html ?? ''); // DOMPurify is loaded by index.html
+  return domPurify.sanitize(String(html ?? ''));
+}
+
+/**
+ * Sanitizes a trusted page/modal template before it is assigned to innerHTML.
+ *
+ * The app's templates use inline handlers (onclick/onchange/oninput/onkeydown),
+ * so those are explicitly allowed. Scripts, embedded objects, `<base>`,
+ * `srcdoc` and `javascript:` URLs are still removed, which blocks the usual
+ * injection vectors if a template ever interpolates stored data.
+ *
+ * Do not use this for table-row fragments (`<tr>`/`<td>`): sanitizing them
+ * outside a table context drops the row tags. Build such rows with
+ * document.createElement instead.
+ */
+export function sanitizeTemplate(html) {
+  const domPurify = purify();
+  const source = String(html ?? '');
+  if (!domPurify) return source;
+  return domPurify.sanitize(source, {
+    ADD_ATTR: TEMPLATE_HANDLER_ATTRS,
+    ALLOW_DATA_ATTR: true,
+    FORBID_TAGS: ['script', 'object', 'embed', 'base'],
+    FORBID_ATTR: ['srcdoc']
+  });
 }
 
 export function createElement(tag, attrs = {}, children = []) {

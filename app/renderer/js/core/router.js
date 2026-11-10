@@ -6,7 +6,7 @@
 import { setState } from './state.js';
 import { hasPermission, hasRole } from './auth.js';
 import { showToast } from './notifications.js';
-import { isolatePageIds } from './dom.js';
+import { isolatePageIds, sanitizeTemplate } from './dom.js';
 
 const contentEl = () => document.getElementById('content');
 let currentPageModule = null;
@@ -59,7 +59,7 @@ export async function navigateTo(pageName, params = {}) {
 
     // 3. Render template (if the module exports a getTemplate or template string)
     if (module.getTemplate) {
-      container.innerHTML = module.getTemplate();
+      container.innerHTML = sanitizeTemplate(module.getTemplate());
     } else if (module.render) {
       module.render(container);
     }
@@ -77,7 +77,10 @@ export async function navigateTo(pageName, params = {}) {
     }
   } catch (err) {
     console.error(`Router failed to load page "${pageName}":`, err);
-    container.innerHTML = `<p style="padding:20px;color:#ef4444">Failed to load page: ${pageName}</p>`;
+    const message = document.createElement('p');
+    message.style.cssText = 'padding:20px;color:#ef4444';
+    message.textContent = `Failed to load page: ${pageName}`;
+    container.replaceChildren(message);
   }
 }
 
